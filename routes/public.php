@@ -20,5 +20,8 @@ use Illuminate\Support\Facades\Route;
 // PRD-01 CP
 
 // PRD-02 CAT
-
+Route::get('/produk', [\App\Http\Controllers\PublicSite\Catalog\CatalogController::class, 'index'])->name('catalog.index');
+Route::get('/produk/kategori/{category:slug}', [\App\Http\Controllers\PublicSite\Catalog\CatalogController::class, 'category'])->name('catalog.category');
+Route::get('/produk/{product:slug}', [\App\Http\Controllers\PublicSite\Catalog\ProductController::class, 'show'])->name('products.show');
+Route::post('/produk/{product:slug}/estimasi', \App\Http\Controllers\PublicSite\Catalog\PriceEstimateController::class)->name('products.estimate');
 // PRD-03 ORD
