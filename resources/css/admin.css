@@ -1,0 +1,9 @@
+/*
+ * ENTRY CSS - Styling Admin Dashboard
+ * Domain : SHARED - dipakai lintas domain (ubah hanya setelah koordinasi)
+ * Status : placeholder, belum diimplementasikan.
+ */
+
+@import './app.css';
+
+/* Tambahkan style khusus dashboard di bawah ini bila Tailwind utility tidak cukup. */
