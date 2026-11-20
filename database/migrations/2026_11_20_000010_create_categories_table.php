@@ -6,9 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 /*
  * Tabel   : categories
- * Domain  : PRD-04 ADM - Admin Dashboard & CMS (Taufik)
- * Catatan : kerangka. Kolom final ditulis pemilik domain saat fitur dikerjakan,
- *           mengacu ke Master PRD (bagian J Data requirements) dan ERD bersama.
+ * Domain  : PRD-02 CAT - Catalog & Customization (Haidir)
+ * Catatan : Hanya kategori aktif yang tampil di website publik (CAT-FR-001).
  */
 return new class extends Migration
 {
@@ -16,7 +15,11 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            // TODO: kolom sesuai Master PRD dan ERD final.
+            $table->string('name', 120);
+            $table->string('slug', 140)->unique();
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true)->index();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
         });
     }
