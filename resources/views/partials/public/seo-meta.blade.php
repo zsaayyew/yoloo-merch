@@ -2,7 +2,21 @@
     CP-FR-016 - SEO dasar: title dan meta description per halaman
     Domain  : PRD-01 CP  - Company Profile (Bertrand)
     Catatan : halaman mengisi @section('title') dan @section('meta_description').
-    Status  : kerangka awal.
+    Status  : fallback title tersedia; description hanya dirender jika kontennya tersedia.
 --}}
-<title>@yield('title', 'YOLOO Merch') - YOLOO Merch</title>
-<meta name="description" content="@yield('meta_description', '')">
+
+@php
+    $siteTitle = config('app.name') ?: 'YOLOO Merch';
+    $pageTitle = html_entity_decode(
+        trim($__env->yieldContent('title')),
+        ENT_QUOTES | ENT_HTML5,
+        'UTF-8',
+    );
+    $metaDescription = trim($__env->yieldContent('meta_description'));
+@endphp
+
+<title>{{ $pageTitle !== '' ? $pageTitle . ' | ' . $siteTitle : $siteTitle }}</title>
+
+@if ($metaDescription !== '')
+    <meta name="description" content="{{ $metaDescription }}">
+@endif
