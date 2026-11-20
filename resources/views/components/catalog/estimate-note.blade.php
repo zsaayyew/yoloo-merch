@@ -1,7 +1,7 @@
-{{--
-    CAT-BR-003 - Label Estimasi + catatan konfirmasi admin
-    Domain  : PRD-02 CAT - Catalog & Customization (Haidir)
-    Catatan : Dipakai juga oleh ORD di keranjang, ringkasan, dan konfirmasi (ORD-BR-004).
-    Status  : placeholder, belum diimplementasikan.
---}}
+{{-- CAT-BR-003 · Label estimasi untuk CAT dan ORD · PRD-02 CAT (Haidir) · Status: diimplementasikan. --}}
 @props([])
+
+<div {{ $attributes->class('text-sm text-zinc-800') }}>
+    <p class="font-bold">Estimasi</p>
+    <p>Harga akhir dikonfirmasi oleh admin.</p>
+</div>
