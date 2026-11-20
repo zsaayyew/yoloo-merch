@@ -3,6 +3,7 @@
 // Status : placeholder, belum diimplementasikan.
 
 import './app';
+import './public/product-configurator.js';
 
 // Import modul fitur saat fitur dikerjakan, contoh:
 // import './public/mobile-nav';
