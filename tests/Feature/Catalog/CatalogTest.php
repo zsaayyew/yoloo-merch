@@ -4,30 +4,22 @@ namespace Tests\Feature\Catalog;
 
 use App\Models\Product;
 use App\Services\Catalog\ConfigurationPayloadBuilder;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class CatalogTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->withoutVite();
-        config([
-            'app.key' => 'base64:'.base64_encode(str_repeat('k', 32)),
-            'database.default' => 'catalog_test',
-            'database.connections.catalog_test' => [
-                'driver' => 'sqlite',
-                'database' => ':memory:',
-                'prefix' => '',
-            ],
-        ]);
-        $this->createCatalogFixtures();
+        $this->seedCatalogFixtures();
     }
 
     public function test_public_list_filters_active_products_and_ignores_invalid_filters(): void
@@ -120,78 +112,11 @@ class CatalogTest extends TestCase
     }
 
     /**
-     * Skema katalog masih kerangka di folder migrations, jadi tes ini membangun
-     * tabel yang dipakai CatalogData sendiri pada koneksi sqlite terpisah.
+     * Skema katalog dibangun oleh migration asli; di sini hanya data contoh
+     * yang dipakai oleh CatalogData, PriceCalculator, dan view publik.
      */
-    private function createCatalogFixtures(): void
+    private function seedCatalogFixtures(): void
     {
-        foreach (['pricing_configurations', 'option_values', 'option_groups', 'product_images', 'products', 'categories'] as $table) {
-            Schema::dropIfExists($table);
-        }
-
-        Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->boolean('is_active')->default(true);
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->timestamps();
-        });
-
-        Schema::create('products', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('category_id');
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->text('specifications')->nullable();
-            $table->string('price_model')->nullable();
-            $table->boolean('allows_direct_purchase')->default(true);
-            $table->string('status')->default('active');
-            $table->timestamps();
-        });
-
-        Schema::create('product_images', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_id');
-            $table->string('path');
-            $table->string('alt_text')->nullable();
-            $table->boolean('is_primary')->default(false);
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->timestamps();
-        });
-
-        Schema::create('option_groups', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_id');
-            $table->string('name');
-            $table->boolean('is_required')->default(false);
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->timestamps();
-        });
-
-        Schema::create('option_values', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('option_group_id');
-            $table->string('label');
-            $table->boolean('is_active')->default(true);
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->json('forbidden_combinations')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('pricing_configurations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_id');
-            $table->string('price_model');
-            $table->string('status')->default('active');
-            $table->date('effective_date');
-            $table->unsignedInteger('version')->default(1);
-            $table->unsignedBigInteger('base_price');
-            $table->json('config')->nullable();
-            $table->timestamps();
-        });
-
         $now = now();
 
         DB::table('categories')->insert([
