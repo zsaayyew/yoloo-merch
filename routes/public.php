@@ -15,9 +15,19 @@
 | Larangan   : TIDAK ADA route cek status pesanan (ORD-BR-013).
 */
 
+use App\Http\Controllers\PublicSite\CompanyProfile\AboutController;
+use App\Http\Controllers\PublicSite\CompanyProfile\ContactController;
+use App\Http\Controllers\PublicSite\CompanyProfile\GalleryController;
+use App\Http\Controllers\PublicSite\CompanyProfile\HomeController;
+use App\Http\Controllers\PublicSite\CompanyProfile\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 // PRD-01 CP
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/tentang-kami', [AboutController::class, 'index'])->name('about');
+Route::get('/ulasan-kolaborasi', [ReviewController::class, 'index'])->name('reviews');
+Route::get('/galeri', [GalleryController::class, 'index'])->name('gallery');
+Route::get('/kontak', [ContactController::class, 'index'])->name('contact');
 
 // PRD-02 CAT
 Route::get('/produk', [\App\Http\Controllers\PublicSite\Catalog\CatalogController::class, 'index'])->name('catalog.index');
