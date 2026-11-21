@@ -4,11 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/*
- * Tabel   : carts
- * Domain  : PRD-03 ORD - Customer Ordering (Raisyah)
- * Catatan : kerangka. Kolom final ditulis pemilik domain saat fitur dikerjakan,
- *           mengacu ke Master PRD (bagian J Data requirements) dan ERD bersama.
+/**
+ * PRD-03 ORD — Keranjang guest (ORD-FR-003, keputusan K-5).
+ * Keranjang diidentifikasi dengan token acak yang disimpan di cookie selama 7 hari.
  */
 return new class extends Migration
 {
@@ -16,7 +14,8 @@ return new class extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            // TODO: kolom sesuai Master PRD dan ERD final.
+            $table->string('token', 64)->unique();   // nilai cookie, acak (Str::random(64))
+            $table->timestamp('expires_at')->index(); // dibersihkan oleh PurgeExpiredOrderingData
             $table->timestamps();
         });
     }
