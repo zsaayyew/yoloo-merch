@@ -34,4 +34,34 @@ class Customer extends Model
     {
         return $this->hasMany(OrderRequest::class);
     }
+
+    /**
+     * Cari pelanggan dari nomor WhatsApp ternormalisasi, atau buat baru (FIN-BR-012).
+     * Nama pelanggan lama tidak ditimpa (dikelola admin); email diisi hanya jika sebelumnya kosong.
+     * Panggil di dalam DB::transaction().
+     *
+     * @param  array{name: string, whatsapp_number: string, email?: string|null}  $contact
+     */
+    public static function resolveFromContact(array $contact): self
+    {
+        $customer = static::query()
+            ->where('whatsapp_number', $contact['whatsapp_number'])
+            ->lockForUpdate()
+            ->first();
+
+        if (! $customer) {
+            return static::create([
+                'name' => $contact['name'],
+                'whatsapp_number' => $contact['whatsapp_number'],
+                'email' => $contact['email'] ?? null,
+                'is_active' => true,
+            ]);
+        }
+
+        if (blank($customer->email) && filled($contact['email'] ?? null)) {
+            $customer->update(['email' => $contact['email']]);
+        }
+
+        return $customer;
+    }
 }

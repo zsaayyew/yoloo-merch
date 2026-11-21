@@ -54,3 +54,8 @@ Route::get('/keranjang', [\App\Http\Controllers\PublicSite\Ordering\CartControll
 Route::post('/keranjang', [\App\Http\Controllers\PublicSite\Ordering\CartController::class, 'store'])->name('cart.store');
 Route::patch('/keranjang/{cartItem}', [\App\Http\Controllers\PublicSite\Ordering\CartController::class, 'update'])->name('cart.update');
 Route::delete('/keranjang/{cartItem}', [\App\Http\Controllers\PublicSite\Ordering\CartController::class, 'destroy'])->name('cart.destroy');
+Route::get('/checkout', [\App\Http\Controllers\PublicSite\Ordering\CheckoutController::class, 'customer'])->name('checkout.customer');
+Route::post('/checkout', [\App\Http\Controllers\PublicSite\Ordering\CheckoutController::class, 'storeCustomer'])->name('checkout.customer.store');
+Route::get('/checkout/ringkasan', [\App\Http\Controllers\PublicSite\Ordering\CheckoutController::class, 'summary'])->name('checkout.summary');
+Route::post('/checkout/kirim', [\App\Http\Controllers\PublicSite\Ordering\CheckoutController::class, 'submit'])->middleware('throttle:5,10')->name('checkout.submit');
+Route::get('/pesanan/berhasil/{code}', [\App\Http\Controllers\PublicSite\Ordering\CheckoutController::class, 'success'])->name('orders.success');
