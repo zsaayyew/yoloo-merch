@@ -4,5 +4,16 @@ namespace App\Enums;
 
 enum PaymentStatus: string
 {
-    //
+    case Unpaid = 'unpaid';
+    case PartiallyPaid = 'partially_paid';
+    case Paid = 'paid';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Unpaid => 'Belum Dibayar',
+            self::PartiallyPaid => 'Dibayar Sebagian',
+            self::Paid => 'Lunas',
+        };
+    }
 }
