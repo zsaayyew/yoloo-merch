@@ -35,12 +35,14 @@ class ProductConfigurationValidator
 
             if ($value === null) {
                 $errors['option_value_ids'] = 'Ada pilihan yang sudah tidak tersedia untuk produk ini.';
+
                 continue;
             }
 
             $key = "option_group_{$value->option_group_id}";
             if ($selected->has($value->option_group_id)) {
                 $errors[$key] = 'Pilih satu nilai untuk setiap grup opsi.';
+
                 continue;
             }
 

@@ -4,19 +4,14 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/*
- * Tabel   : roles
- * Domain  : PRD-04 ADM - Admin Dashboard & CMS (Taufik)
- * Catatan : kerangka. Kolom final ditulis pemilik domain saat fitur dikerjakan,
- *           mengacu ke Master PRD (bagian J Data requirements) dan ERD bersama.
- */
 return new class extends Migration
 {
     public function up(): void
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            // TODO: kolom sesuai Master PRD dan ERD final.
+            $table->string('name')->unique(); // owner / admin
+            $table->string('label');          // teks tampilan
             $table->timestamps();
         });
     }

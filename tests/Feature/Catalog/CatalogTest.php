@@ -4,30 +4,22 @@ namespace Tests\Feature\Catalog;
 
 use App\Models\Product;
 use App\Services\Catalog\ConfigurationPayloadBuilder;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class CatalogTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->withoutVite();
-        config([
-            'app.key' => 'base64:'.base64_encode(str_repeat('k', 32)),
-            'database.default' => 'catalog_test',
-            'database.connections.catalog_test' => [
-                'driver' => 'sqlite',
-                'database' => ':memory:',
-                'prefix' => '',
-            ],
-        ]);
-        $this->createCatalogFixtures();
+        $this->seedCatalogFixtures();
     }
 
     public function test_public_list_filters_active_products_and_ignores_invalid_filters(): void
@@ -115,3 +107,101 @@ class CatalogTest extends TestCase
                 'quantity' => 10,
                 'estimated_unit_price' => null,
                 'estimated_total' => null,
+                'pricing_version' => null,
+            ]);
+    }
+
+    /**
+     * Skema katalog dibangun oleh migration asli; di sini hanya data contoh
+     * yang dipakai oleh CatalogData, PriceCalculator, dan view publik.
+     */
+    private function seedCatalogFixtures(): void
+    {
+        $now = now();
+
+        DB::table('categories')->insert([
+            ['id' => 1, 'name' => 'Cetak', 'slug' => 'cetak', 'is_active' => true, 'sort_order' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 2, 'name' => 'Arsip', 'slug' => 'arsip', 'is_active' => false, 'sort_order' => 2, 'created_at' => $now, 'updated_at' => $now],
+        ]);
+
+        DB::table('products')->insert([
+            [
+                'id' => 1, 'category_id' => 1, 'name' => 'Stiker kertas', 'slug' => 'stiker',
+                'description' => 'Stiker cetak custom.',
+                'specifications' => json_encode(['Bahan' => 'Vinil', 'Kode' => 'VK-270']),
+                'price_model' => 'calculator', 'allows_direct_purchase' => true, 'status' => 'active',
+                'created_at' => $now, 'updated_at' => $now,
+            ],
+            [
+                'id' => 2, 'category_id' => 1, 'name' => 'Produk draf', 'slug' => 'draf',
+                'description' => null, 'specifications' => null,
+                'price_model' => 'fixed', 'allows_direct_purchase' => true, 'status' => 'draft',
+                'created_at' => $now, 'updated_at' => $now,
+            ],
+            [
+                'id' => 3, 'category_id' => 2, 'name' => 'Produk tersembunyi', 'slug' => 'tersembunyi',
+                'description' => null, 'specifications' => null,
+                'price_model' => 'fixed', 'allows_direct_purchase' => true, 'status' => 'active',
+                'created_at' => $now, 'updated_at' => $now,
+            ],
+            [
+                'id' => 4, 'category_id' => 1, 'name' => 'Produk tetap', 'slug' => 'tetap',
+                'description' => null, 'specifications' => null,
+                'price_model' => 'fixed', 'allows_direct_purchase' => true, 'status' => 'active',
+                'created_at' => $now, 'updated_at' => $now,
+            ],
+            [
+                'id' => 5, 'category_id' => 1, 'name' => 'Produk mulai', 'slug' => 'mulai',
+                'description' => null, 'specifications' => null,
+                'price_model' => 'starting_from', 'allows_direct_purchase' => true, 'status' => 'active',
+                'created_at' => $now, 'updated_at' => $now,
+            ],
+            [
+                'id' => 6, 'category_id' => 1, 'name' => 'Produk penawaran', 'slug' => 'penawaran',
+                'description' => null, 'specifications' => null,
+                'price_model' => 'quotation', 'allows_direct_purchase' => false, 'status' => 'active',
+                'created_at' => $now, 'updated_at' => $now,
+            ],
+        ]);
+
+        DB::table('product_images')->insert([
+            ['id' => 1, 'product_id' => 1, 'path' => 'asset-satu.jpg', 'alt_text' => 'Stiker tampak depan', 'is_primary' => true, 'sort_order' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 2, 'product_id' => 1, 'path' => 'asset-dua.jpg', 'alt_text' => 'Stiker tampak samping', 'is_primary' => false, 'sort_order' => 2, 'created_at' => $now, 'updated_at' => $now],
+        ]);
+
+        DB::table('option_groups')->insert([
+            ['id' => 10, 'product_id' => 1, 'name' => 'Bahan', 'is_required' => true, 'sort_order' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 11, 'product_id' => 1, 'name' => 'Finishing', 'is_required' => false, 'sort_order' => 2, 'created_at' => $now, 'updated_at' => $now],
+        ]);
+
+        DB::table('option_values')->insert([
+            ['id' => 7, 'option_group_id' => 10, 'label' => 'Vinil', 'is_active' => true, 'sort_order' => 1, 'forbidden_combinations' => json_encode([8]), 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 12, 'option_group_id' => 10, 'label' => 'Kertas', 'is_active' => true, 'sort_order' => 2, 'forbidden_combinations' => null, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 8, 'option_group_id' => 11, 'label' => 'Laminasi', 'is_active' => true, 'sort_order' => 1, 'forbidden_combinations' => null, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 9, 'option_group_id' => 10, 'label' => 'Vinil lama', 'is_active' => false, 'sort_order' => 3, 'forbidden_combinations' => null, 'created_at' => $now, 'updated_at' => $now],
+        ]);
+
+        DB::table('pricing_configurations')->insert([
+            [
+                'id' => 1, 'product_id' => 1, 'price_model' => 'calculator', 'status' => 'active',
+                'effective_date' => '2026-01-01', 'version' => 2, 'base_price' => 1500,
+                'config' => json_encode([
+                    'minimum_quantity' => 10,
+                    'option_surcharges' => ['7' => 500],
+                    'extra_fee' => 1000,
+                ]),
+                'created_at' => $now, 'updated_at' => $now,
+            ],
+            [
+                'id' => 2, 'product_id' => 4, 'price_model' => 'fixed', 'status' => 'active',
+                'effective_date' => '2026-01-01', 'version' => 1, 'base_price' => 3000,
+                'config' => null, 'created_at' => $now, 'updated_at' => $now,
+            ],
+            [
+                'id' => 3, 'product_id' => 5, 'price_model' => 'starting_from', 'status' => 'active',
+                'effective_date' => '2026-01-01', 'version' => 1, 'base_price' => 4000,
+                'config' => null, 'created_at' => $now, 'updated_at' => $now,
+            ],
+        ]);
+    }
+}

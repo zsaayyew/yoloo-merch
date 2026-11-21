@@ -1,7 +1,6 @@
 // CAT-FR-003 / CAT-FR-005 / CAT-FR-006 / CAT-FR-011 — Interaksi katalog.
 
 import { displayEstimate, requestCatalogCheck } from "./price-calculator.js";
-import "./public/product-configurator.js";
 
 for (const form of document.querySelectorAll("[data-catalog-configurator]")) {
   const fields = [...form.querySelectorAll("[data-catalog-input]")];

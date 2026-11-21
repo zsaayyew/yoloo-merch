@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 /*
  * Tabel   : option_groups
- * Domain  : PRD-04 ADM - Admin Dashboard & CMS (Taufik)
- * Catatan : kerangka. Kolom final ditulis pemilik domain saat fitur dikerjakan,
- *           mengacu ke Master PRD (bagian J Data requirements) dan ERD bersama.
+ * Domain  : PRD-02 CAT - Catalog & Customization (Haidir)
+ * Catatan : Grup opsi per produk (mis. Bahan, Finishing). is_required=true
+ *           membuat pelanggan wajib memilih satu nilai pada grup tersebut.
  */
 return new class extends Migration
 {
@@ -16,8 +16,13 @@ return new class extends Migration
     {
         Schema::create('option_groups', function (Blueprint $table) {
             $table->id();
-            // TODO: kolom sesuai Master PRD dan ERD final.
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->string('name', 120);
+            $table->boolean('is_required')->default(false);
+            $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
+
+            $table->index(['product_id', 'sort_order']);
         });
     }
 

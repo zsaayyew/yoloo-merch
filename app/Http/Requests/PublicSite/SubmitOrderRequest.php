@@ -2,28 +2,34 @@
 
 namespace App\Http\Requests\PublicSite;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * PRD-03 ORD — Validasi kirim pesanan (ORD-FR-007, ORD-FR-008, ORD-FR-013).
+ * Data pelanggan dan item TIDAK diambil dari form ini, melainkan dari sesi dan keranjang di server.
+ */
 class SubmitOrderRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'submission_token' => ['required', 'string', 'size:64'],
+            'agreement' => ['accepted'],
+            'website' => ['prohibited'], // honeypot
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'submission_token.*' => 'Formulir sudah kedaluwarsa. Periksa kembali ringkasan, lalu kirim ulang.',
+            'agreement.accepted' => 'Centang persetujuan terlebih dahulu sebelum mengirim pesanan.',
+            'website.prohibited' => 'Pesanan tidak dapat diproses.',
         ];
     }
 }
