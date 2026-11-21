@@ -48,3 +48,7 @@ Route::delete('/lampiran/{attachment}', [\App\Http\Controllers\PublicSite\Orderi
 Route::get('/custom-order', [\App\Http\Controllers\PublicSite\Ordering\CustomOrderController::class, 'create'])->name('custom-orders.create');
 Route::post('/custom-order', [\App\Http\Controllers\PublicSite\Ordering\CustomOrderController::class, 'store'])->middleware('throttle:5,10')->name('custom-orders.store');
 Route::get('/custom-order/berhasil/{code}', [\App\Http\Controllers\PublicSite\Ordering\CustomOrderController::class, 'success'])->name('custom-orders.success');
+Route::get('/keranjang', [\App\Http\Controllers\PublicSite\Ordering\CartController::class, 'index'])->name('cart.index');
+Route::post('/keranjang', [\App\Http\Controllers\PublicSite\Ordering\CartController::class, 'store'])->name('cart.store');
+Route::patch('/keranjang/{cartItem}', [\App\Http\Controllers\PublicSite\Ordering\CartController::class, 'update'])->name('cart.update');
+Route::delete('/keranjang/{cartItem}', [\App\Http\Controllers\PublicSite\Ordering\CartController::class, 'destroy'])->name('cart.destroy');
