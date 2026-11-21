@@ -10,6 +10,14 @@
 @section('meta_description', 'Your Personal Merchandise Solution. Jelajahi layanan merchandise custom dan printing YOLOO Merch.')
 
 @section('content')
+    @php
+        $showFeaturedProducts = \Illuminate\Support\Facades\Route::has('catalog.index')
+            && \Illuminate\Support\Facades\Route::has('products.show')
+            && isset($featuredProducts)
+            && $featuredProducts instanceof \Illuminate\Support\Collection
+            && $featuredProducts->isNotEmpty();
+    @endphp
+
     @include('public.home.sections.hero')
     @include('public.home.sections.intro')
     @include('public.home.sections.featured-products')

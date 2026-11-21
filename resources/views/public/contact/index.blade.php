@@ -7,7 +7,7 @@
 @extends('layouts.public')
 
 @section('title', 'Kontak')
-@section('meta_description', 'Hubungi YOLOO Merch melalui WhatsApp, Instagram, atau email.')
+@section('meta_description', 'Informasi kontak resmi YOLOO Merch untuk pertanyaan tentang produk dan layanan.')
 
 @section('content')
     @include('public.contact.sections.channels')
