@@ -73,7 +73,7 @@ class CustomRequestSubmissionService
                 $this->failToken();
             }
 
-            $customer = $this->findOrCreateCustomer($data);
+            $customer = Customer::resolveFromContact($data);
             $orderRequest = $this->createRequest($data, $customer, $product);
 
             if ($uploadToken) {
@@ -87,34 +87,6 @@ class CustomRequestSubmissionService
 
             return $orderRequest;
         });
-    }
-
-    /**
-     * Pelanggan dicari dari nomor WhatsApp ternormalisasi.
-     * Nama pelanggan lama tidak ditimpa (data pelanggan dikelola admin/FIN);
-     * email hanya diisi jika sebelumnya kosong.
-     */
-    private function findOrCreateCustomer(array $data): Customer
-    {
-        $customer = Customer::query()
-            ->where('whatsapp_number', $data['whatsapp_number'])
-            ->lockForUpdate()
-            ->first();
-
-        if (! $customer) {
-            return Customer::create([
-                'name' => $data['name'],
-                'whatsapp_number' => $data['whatsapp_number'],
-                'email' => $data['email'] ?? null,
-                'is_active' => true,
-            ]);
-        }
-
-        if (blank($customer->email) && filled($data['email'] ?? null)) {
-            $customer->update(['email' => $data['email']]);
-        }
-
-        return $customer;
     }
 
     private function createRequest(array $data, Customer $customer, ?Product $product): OrderRequest
