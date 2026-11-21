@@ -4,11 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/*
- * Tabel   : customers
- * Domain  : PRD-03 ORD - Customer Ordering (Raisyah) + PRD-05 FIN - Sales, Transaction & Finance (Zhaqtiawan)
- * Catatan : kerangka. Kolom final ditulis pemilik domain saat fitur dikerjakan,
- *           mengacu ke Master PRD (bagian J Data requirements) dan ERD bersama.
+/**
+ * Bersama ORD + FIN — Data pelanggan (AI_CONTEXT 6.1).
+ * Pelanggan guest diidentifikasi dari nomor WhatsApp ternormalisasi 62xxxxxxxxxx.
  */
 return new class extends Migration
 {
@@ -16,7 +14,11 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            // TODO: kolom sesuai Master PRD dan ERD final.
+            $table->string('name', 100);
+            $table->string('whatsapp_number', 20)->unique();
+            $table->string('email')->nullable();
+            $table->text('notes')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
