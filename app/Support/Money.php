@@ -2,13 +2,13 @@
 
 namespace App\Support;
 
+/**
+ * Format Rupiah tanpa desimal. Contoh: 125000 => "Rp125.000".
+ */
 class Money
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
+    public static function format(int $amount): string
     {
-        //
+        return 'Rp' . number_format($amount, 0, ',', '.');
     }
 }

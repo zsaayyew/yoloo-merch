@@ -1,6 +1,8 @@
-{{--
-    PAGE-CAT-002 - Section 'category-header' (Produk per Kategori)
-    Domain  : PRD-02 CAT - Catalog & Customization (Haidir)
-    Catatan : Partial khusus halaman ini; di-include dari file halaman utama.
-    Status  : placeholder, belum diimplementasikan.
---}}
+{{-- PAGE-CAT-002 · Header kategori · PRD-02 CAT (Haidir) · Status: diimplementasikan. --}}
+<header>
+    <a class="text-sm font-semibold underline" href="{{ route('catalog.index') }}">Semua produk</a>
+    <h1 class="mt-4 text-4xl font-bold tracking-tight">{{ $category->name }}</h1>
+    @if ($category->description)
+        <p class="mt-2 max-w-2xl whitespace-pre-line text-zinc-700">{{ $category->description }}</p>
+    @endif
+</header>

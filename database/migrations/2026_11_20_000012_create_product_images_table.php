@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 /*
  * Tabel   : product_images
- * Domain  : PRD-04 ADM - Admin Dashboard & CMS (Taufik)
- * Catatan : kerangka. Kolom final ditulis pemilik domain saat fitur dikerjakan,
- *           mengacu ke Master PRD (bagian J Data requirements) dan ERD bersama.
+ * Domain  : PRD-02 CAT - Catalog & Customization (Haidir)
+ * Catatan : path relatif di disk "public". is_primary menentukan foto utama,
+ *           sort_order mengatur urutan galeri.
  */
 return new class extends Migration
 {
@@ -16,8 +16,14 @@ return new class extends Migration
     {
         Schema::create('product_images', function (Blueprint $table) {
             $table->id();
-            // TODO: kolom sesuai Master PRD dan ERD final.
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->string('path', 255);
+            $table->string('alt_text', 200)->nullable();
+            $table->boolean('is_primary')->default(false);
+            $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
+
+            $table->index(['product_id', 'is_primary', 'sort_order']);
         });
     }
 

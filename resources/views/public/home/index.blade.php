@@ -2,11 +2,12 @@
     PAGE-CP-001 - Beranda
     Domain  : PRD-01 CP  - Company Profile (Bertrand)
     Catatan : Route /. Urutan section sesuai PAGE-CP-001; navbar dan footer dari layout.
-    Status  : placeholder, belum diimplementasikan.
+    Status  : section statis terimplementasi; preview data menunggu ADM/CAT.
 --}}
 @extends('layouts.public')
 
 @section('title', 'Beranda')
+@section('meta_description', 'Your Personal Merchandise Solution. Jelajahi layanan merchandise custom dan printing YOLOO Merch.')
 
 @section('content')
     @include('public.home.sections.hero')
