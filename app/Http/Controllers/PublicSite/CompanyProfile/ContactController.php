@@ -9,6 +9,10 @@ class ContactController extends Controller
 {
     public function index(): View
     {
-        return view('public.contact.index');
+        // ADM's SiteSetting schema is not available; do not publish unverified initial contact values.
+        return view('public.contact.index', [
+            'contactChannels' => [],
+            'businessLocation' => [],
+        ]);
     }
 }

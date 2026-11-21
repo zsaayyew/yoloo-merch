@@ -11,12 +11,13 @@
             <p class="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500">
                 Profil Usaha
             </p>
-            <h2 id="about-profile-title" class="mt-3 text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl">
-                Merchandise custom dan layanan cetak
-            </h2>
+            <h1 id="about-profile-title" class="mt-3 text-3xl font-black tracking-tight text-[#181818] sm:text-4xl">
+                Tentang YOLOO Merch
+            </h1>
         </div>
 
-        <div class="max-w-2xl text-base leading-7 text-zinc-700 sm:text-lg sm:leading-8">
+        <div class="max-w-2xl text-base leading-7 text-[#181818]/75 sm:text-lg sm:leading-8">
+            <p class="mb-3 font-bold text-[#14747b]">Merchandise custom dan layanan printing.</p>
             <p>
                 YOLOO Merch menyediakan jasa pembuatan merchandise custom serta layanan cetak berdasarkan produk yang tersedia dalam katalog.
             </p>
@@ -24,7 +25,7 @@
                 Layanan ini ditujukan bagi individu, mahasiswa, organisasi, komunitas, dan pihak lain yang mencari merchandise. Pilihan produk beserta variasinya dapat dilihat melalui katalog.
             </p>
             <a href="{{ route('catalog.index') }}"
-               class="mt-6 inline-flex items-center font-semibold text-zinc-950 underline decoration-zinc-400 underline-offset-4 hover:decoration-zinc-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-900">
+               class="mt-6 inline-flex items-center font-bold text-[#124f53] underline decoration-[#58C0C8] decoration-2 underline-offset-4 hover:decoration-[#181818] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#14747b]">
                 Jelajahi Katalog
                 <span class="sr-only"> YOLOO Merch</span>
             </a>

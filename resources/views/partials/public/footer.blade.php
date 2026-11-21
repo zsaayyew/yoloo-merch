@@ -1,59 +1,43 @@
-{{--
-    GLOBAL-CP-002 - Footer global
-    Domain  : PRD-01 CP  - Company Profile (Bertrand)
-    Catatan : Kontak harus konsisten dengan halaman Kontak (data dari site settings ADM).
-    Status  : identitas situs, navigasi cepat, dan hak cipta diimplementasikan.
---}}
-
+{{-- GLOBAL-CP-002: footer global; tautkan halaman kontak sampai ADM menyediakan kanal terverifikasi. --}}
 @php
-    $footerNavigationItems = [
-        ['label' => 'Beranda', 'route' => 'home', 'fallback' => '/'],
-        ['label' => 'Katalog', 'route' => null, 'fallback' => null],
-        ['label' => 'Galeri', 'route' => 'gallery', 'fallback' => '/galeri'],
-        ['label' => 'Tentang Kami', 'route' => 'about', 'fallback' => '/tentang-kami'],
-        ['label' => 'Ulasan & Kolaborasi', 'route' => 'reviews', 'fallback' => '/ulasan-kolaborasi'],
-        ['label' => 'Kontak', 'route' => 'contact', 'fallback' => '/kontak'],
+    $siteTitle = 'YOLOO Merch';
+    $footerItems = [
+        ['label' => 'Beranda', 'route' => 'home'],
+        ['label' => 'Katalog', 'route' => 'catalog.index'],
+        ['label' => 'Galeri', 'route' => 'gallery'],
+        ['label' => 'Tentang Kami', 'route' => 'about'],
+        ['label' => 'Ulasan & Kolaborasi', 'route' => 'reviews'],
+        ['label' => 'Kontak', 'route' => 'contact'],
     ];
-
-    $footerNavigationUrl = static function (array $item): string {
-        if ($item['route'] === null) {
-            return route('catalog.index');
-        }
-
-        return \Illuminate\Support\Facades\Route::has($item['route'])
-            ? route($item['route'])
-            : url($item['fallback']);
-    };
-
-    $siteTitle = config('app.name') ?: 'YOLOO Merch';
 @endphp
 
-<footer class="border-t border-zinc-200 bg-zinc-50">
-    <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-2 lg:px-8">
+<footer class="border-t border-[#181818]/10 bg-[#181818] text-white">
+    <div class="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.2fr_1fr_1fr] lg:px-8">
         <div>
-            <a href="{{ \Illuminate\Support\Facades\Route::has('home') ? route('home') : url('/') }}"
-               class="text-lg font-bold text-zinc-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-900">
-                {{ $siteTitle }}
+            <a href="{{ route('home') }}" class="inline-flex rounded-md bg-white px-3 py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#58C0C8]" aria-label="YOLOO Merch — Beranda">
+                <img src="{{ asset('images/brand/yoloo-logo-full.png') }}" alt="YOLOO Merch" width="330" height="96" loading="lazy" class="h-10 w-auto">
             </a>
+            <p class="mt-4 max-w-sm text-sm leading-6 text-white/75">Your Personal Merchandise Solution</p>
         </div>
 
         <nav aria-label="Navigasi footer">
-            <ul class="flex flex-wrap gap-x-5 gap-y-2">
-                @foreach ($footerNavigationItems as $item)
-                    <li>
-                        <a href="{{ $footerNavigationUrl($item) }}"
-                           class="text-sm text-zinc-700 underline-offset-4 hover:text-zinc-950 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900">
-                            {{ $item['label'] }}
-                        </a>
-                    </li>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-[#58C0C8]">Jelajahi</h2>
+            <ul class="mt-4 grid grid-cols-2 gap-x-3 gap-y-2">
+                @foreach ($footerItems as $item)
+                    @if (\Illuminate\Support\Facades\Route::has($item['route']))
+                        <li><a href="{{ route($item['route']) }}" class="text-sm text-white/80 underline-offset-4 hover:text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#58C0C8]">{{ $item['label'] }}</a></li>
+                    @endif
                 @endforeach
             </ul>
         </nav>
-    </div>
 
-    <div class="border-t border-zinc-200">
-        <p class="mx-auto max-w-7xl px-4 py-4 text-sm text-zinc-600 sm:px-6 lg:px-8">
-            &copy; {{ now()->year }} {{ $siteTitle }}
-        </p>
+        <div>
+            <h2 class="text-sm font-bold uppercase tracking-wider text-[#58C0C8]">Kontak</h2>
+            <p class="mt-4 text-sm leading-6 text-white/75">Informasi kanal komunikasi akan ditampilkan setelah dikonfirmasi.</p>
+            @if (\Illuminate\Support\Facades\Route::has('contact'))<a href="{{ route('contact') }}" class="mt-3 inline-flex text-sm font-bold text-white underline decoration-[#58C0C8] decoration-2 underline-offset-4 hover:text-[#8ce0e4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#58C0C8]">Halaman Kontak <span aria-hidden="true" class="ml-2">→</span></a>@endif
+        </div>
+    </div>
+    <div class="border-t border-white/15">
+        <p class="mx-auto max-w-7xl px-4 py-4 text-xs text-white/60 sm:px-6 lg:px-8">&copy; {{ now()->year }} {{ $siteTitle }}.</p>
     </div>
 </footer>

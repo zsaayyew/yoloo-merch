@@ -1,39 +1,32 @@
-// CP-FR-003 - Menu navigasi mobile
-// Domain : PRD-01 CP  - Company Profile (Bertrand)
-// Status : modul tersedia; import entry point bersama masih menunggu koordinasi.
+// CP-FR-003: progressive enhancement for the native mobile navigation disclosure.
+document.querySelectorAll('[data-mobile-nav]').forEach((disclosure) => {
+    const toggle = disclosure.querySelector('[data-mobile-nav-toggle]');
+    const navigation = disclosure.querySelector('#public-mobile-navigation');
 
-document.querySelectorAll('[data-mobile-nav-toggle]').forEach((toggle) => {
-    const controlledId = toggle.getAttribute('aria-controls');
-    const navigation = controlledId ? document.getElementById(controlledId) : null;
-
-    if (!navigation) {
+    if (!(disclosure instanceof HTMLDetailsElement) || !toggle || !navigation) {
         return;
     }
 
     const label = toggle.querySelector('[data-mobile-nav-label]');
-
-    const setExpanded = (expanded) => {
-        toggle.setAttribute('aria-expanded', String(expanded));
-        navigation.hidden = !expanded;
-
-        if (label) {
-            label.textContent = expanded ? 'Tutup menu' : 'Menu';
-        }
+    const syncState = () => {
+        toggle.setAttribute('aria-expanded', String(disclosure.open));
+        if (label) label.textContent = disclosure.open ? 'Tutup menu' : 'Menu';
     };
 
-    toggle.addEventListener('click', () => {
-        setExpanded(toggle.getAttribute('aria-expanded') !== 'true');
-    });
+    syncState();
+    disclosure.addEventListener('toggle', syncState);
 
     navigation.addEventListener('click', (event) => {
-        if (event.target.closest('a[href]')) {
-            setExpanded(false);
+        if (event.target instanceof Element && event.target.closest('a[href]')) {
+            disclosure.open = false;
+            syncState();
         }
     });
 
-    navigation.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
-            setExpanded(false);
+    disclosure.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && disclosure.open) {
+            disclosure.open = false;
+            syncState();
             toggle.focus();
         }
     });
