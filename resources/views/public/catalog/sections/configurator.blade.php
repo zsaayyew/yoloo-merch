@@ -1,8 +1,10 @@
 {{-- CAT-FR-005 / CAT-FR-006 · Opsi produk · PRD-02 CAT (Haidir) · Status: diimplementasikan. --}}
 @php
-    $previousOptions = collect(old('option_value_ids', []))
+    $cartOptions = request()->query('opsi');
+    $cartQuantity = filter_var(request()->query('jumlah'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+    $previousOptions = collect(old('option_value_ids', is_array($cartOptions) ? $cartOptions : []))
         ->filter(fn ($id) => is_scalar($id))->map(fn ($id) => (string) $id);
-    $previousQuantity = old('quantity', $minimumQuantity);
+    $previousQuantity = old('quantity', $cartQuantity ?: $minimumQuantity);
 @endphp
 
 <form id="konfigurasi" method="POST" action="{{ route('products.estimate', ['product' => $product->slug]) }}"
