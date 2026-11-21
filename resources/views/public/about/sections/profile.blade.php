@@ -24,11 +24,13 @@
             <p class="mt-4">
                 Layanan ini ditujukan bagi individu, mahasiswa, organisasi, komunitas, dan pihak lain yang mencari merchandise. Pilihan produk beserta variasinya dapat dilihat melalui katalog.
             </p>
-            <a href="{{ route('catalog.index') }}"
-               class="mt-6 inline-flex items-center font-bold text-[#124f53] underline decoration-[#58C0C8] decoration-2 underline-offset-4 hover:decoration-[#181818] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#14747b]">
-                Jelajahi Katalog
-                <span class="sr-only"> YOLOO Merch</span>
-            </a>
+            @if (\Illuminate\Support\Facades\Route::has('catalog.index'))
+                <a href="{{ route('catalog.index') }}"
+                   class="mt-6 inline-flex items-center font-bold text-[#124f53] underline decoration-[#58C0C8] decoration-2 underline-offset-4 hover:decoration-[#181818] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#14747b]">
+                    Jelajahi Katalog
+                    <span class="sr-only"> YOLOO Merch</span>
+                </a>
+            @endif
         </div>
     </div>
 </section>

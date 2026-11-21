@@ -19,6 +19,11 @@
                 @endforeach
             </div>
         @endif
-        <div class="mt-9 flex flex-wrap gap-3"><a href="{{ route('catalog.index') }}" class="inline-flex rounded-full bg-[#14747b] px-5 py-3 text-sm font-bold text-white hover:bg-[#105d62]">Jelajahi katalog <span aria-hidden="true" class="ml-2">→</span></a><a href="{{ route('contact') }}" class="inline-flex rounded-full border-2 border-[#181818] px-5 py-3 text-sm font-bold text-[#181818] hover:bg-white">Kontak</a></div>
+        <div class="mt-9 flex flex-wrap gap-3">
+            @if (\Illuminate\Support\Facades\Route::has('catalog.index'))
+                <a href="{{ route('catalog.index') }}" class="inline-flex min-h-11 items-center rounded-full bg-[#14747b] px-5 py-3 text-sm font-bold text-white hover:bg-[#105d62]">Jelajahi katalog <span aria-hidden="true" class="ml-2">→</span></a>
+            @endif
+            <a href="{{ route('contact') }}" class="inline-flex min-h-11 items-center rounded-full border-2 border-[#181818] px-5 py-3 text-sm font-bold text-[#181818] hover:bg-white">Kontak</a>
+        </div>
     </div>
 </section>

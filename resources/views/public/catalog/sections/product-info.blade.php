@@ -1,8 +1,8 @@
 {{-- CAT-FR-004 · Informasi produk · PRD-02 CAT (Haidir) · Status: diimplementasikan. --}}
 <header>
-    <h1 class="text-4xl font-bold tracking-tight text-zinc-950">{{ $product->name }}</h1>
+    <h1 class="text-balance text-4xl leading-[1.06] font-black tracking-tight text-[#182F32] sm:text-5xl xl:text-6xl">{{ $product->name }}</h1>
     @if ($product->description)
-        <p class="mt-4 whitespace-pre-line leading-relaxed text-zinc-700">{{ $product->description }}</p>
+        <p class="mt-4 max-w-prose leading-relaxed whitespace-pre-line text-[#465b5d]">{{ $product->description }}</p>
     @endif
 </header>
 
@@ -13,14 +13,14 @@
 @endphp
 
 @if (is_array($specification) && $specification !== [])
-    <table class="w-full text-left text-sm">
-        <caption class="pb-2 text-left text-lg font-semibold">Spesifikasi</caption>
-        <tbody class="divide-y divide-zinc-200">
+    <table class="w-full table-fixed border-y border-[#d7ddda] text-left text-sm">
+        <caption class="pb-2 text-left text-lg font-bold">Spesifikasi</caption>
+        <tbody class="divide-y divide-[#d7ddda]">
             @foreach ($specification as $label => $detail)
                 @if (is_scalar($detail))
                     <tr>
-                        <th scope="row" class="py-2 pr-3">{{ is_int($label) ? 'Spesifikasi ' . $loop->iteration : $label }}</th>
-                        <td class="py-2">{{ $detail }}</td>
+                        <th scope="row" class="w-2/5 py-2.5 pr-3 align-top font-medium text-[#465b5d]">{{ is_int($label) ? 'Spesifikasi ' . $loop->iteration : $label }}</th>
+                        <td class="py-2.5 align-top font-semibold">{{ $detail }}</td>
                     </tr>
                 @endif
             @endforeach
@@ -28,7 +28,7 @@
     </table>
 @elseif (is_scalar($specification) && $specification !== '')
     <div>
-        <h2 class="text-lg font-semibold">Spesifikasi</h2>
-        <p class="mt-2 whitespace-pre-line text-zinc-700">{{ $specification }}</p>
+        <h2 class="text-lg font-bold">Spesifikasi</h2>
+        <p class="mt-2 whitespace-pre-line text-[#465b5d]">{{ $specification }}</p>
     </div>
 @endif

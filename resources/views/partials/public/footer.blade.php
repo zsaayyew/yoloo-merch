@@ -33,7 +33,7 @@
 
         <div>
             <h2 class="text-sm font-bold uppercase tracking-wider text-[#58C0C8]">Kontak</h2>
-            <p class="mt-4 text-sm leading-6 text-white/75">Informasi kanal komunikasi akan ditampilkan setelah dikonfirmasi.</p>
+            <p class="mt-4 text-sm leading-6 text-white/75">Kunjungi halaman Kontak untuk melihat informasi kanal resmi yang tersedia.</p>
             @if (\Illuminate\Support\Facades\Route::has('contact'))<a href="{{ route('contact') }}" class="mt-3 inline-flex text-sm font-bold text-white underline decoration-[#58C0C8] decoration-2 underline-offset-4 hover:text-[#8ce0e4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#58C0C8]">Halaman Kontak <span aria-hidden="true" class="ml-2">→</span></a>@endif
         </div>
     </div>

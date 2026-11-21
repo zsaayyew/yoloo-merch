@@ -45,6 +45,47 @@ class CatalogTest extends TestCase
         $this->get('/produk/penawaran')->assertOk()->assertSee('Minta penawaran')->assertDontSee('Total estimasi');
     }
 
+    public function test_product_detail_prefills_the_cart_edit_configuration(): void
+    {
+        Route::post('/keranjang', fn () => response()->noContent())->name('cart.store');
+        app('router')->getRoutes()->refreshNameLookups();
+
+        $this->get('/produk/stiker?ubah=42&opsi[]=12&opsi[]=8&jumlah=18')
+            ->assertOk()
+            ->assertSee('<option value="12" selected', false)
+            ->assertSee('<option value="8" selected', false)
+            ->assertSee('min="10" value="18"', false)
+            ->assertSee('<input type="hidden" name="replace_item_id" value="42">', false)
+            ->assertSee('formaction="'.route('cart.store').'"', false);
+
+        $this->get('/produk/stiker?ubah[]=42&opsi[]=9&jumlah[]=18')
+            ->assertOk()
+            ->assertDontSee('name="replace_item_id"', false)
+            ->assertDontSee('<option value="9"', false)
+            ->assertSee('min="10" value="10"', false);
+
+        $this->get('/produk/stiker')->assertOk()->assertDontSee('name="replace_item_id"', false);
+    }
+
+    public function test_html_estimation_redirect_preserves_cart_edit_context(): void
+    {
+        Route::post('/keranjang', fn () => response()->noContent())->name('cart.store');
+        app('router')->getRoutes()->refreshNameLookups();
+
+        $this->post('/produk/stiker/estimasi', [
+            'product_id' => 1,
+            'replace_item_id' => 42,
+            'option_value_ids' => [7],
+            'quantity' => 15,
+        ])->assertRedirect(route('products.show', ['product' => 'stiker']).'#konfigurasi');
+
+        $this->get('/produk/stiker')
+            ->assertOk()
+            ->assertSee('<option value="7" selected', false)
+            ->assertSee('min="10" value="15"', false)
+            ->assertSee('<input type="hidden" name="replace_item_id" value="42">', false);
+    }
+
     public function test_estimate_enforces_options_minimum_activity_and_pricing(): void
     {
         $this->postJson('/produk/stiker/estimasi', ['quantity' => 10, 'option_value_ids' => [7]])
