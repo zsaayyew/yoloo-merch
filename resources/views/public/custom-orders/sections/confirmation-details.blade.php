@@ -38,6 +38,21 @@
             <dt class="text-gray-500">WhatsApp</dt>
             <dd class="font-medium text-gray-900">+{{ $orderRequest->customer->whatsapp_number }}</dd>
         </div>
+        @if ($orderRequest->attachments->isNotEmpty())
+            <div class="sm:col-span-2">
+                <dt class="text-gray-500">File referensi ({{ $orderRequest->attachments->count() }})</dt>
+                <dd class="mt-1">
+                    <ul class="space-y-1">
+                        @foreach ($orderRequest->attachments as $attachment)
+                            <li class="font-medium text-gray-900">
+                                {{ $attachment->original_name }}
+                                <span class="font-normal text-gray-500">({{ $attachment->sizeForHumans() }})</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </dd>
+            </div>
+        @endif
         <div>
             <dt class="text-gray-500">Dikirim pada</dt>
             <dd class="font-medium text-gray-900">{{ $orderRequest->submitted_at->format('d/m/Y H:i') }}</dd>

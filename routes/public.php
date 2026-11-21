@@ -34,8 +34,10 @@ Route::get('/produk', [\App\Http\Controllers\PublicSite\Catalog\CatalogControlle
 Route::get('/produk/kategori/{category:slug}', [\App\Http\Controllers\PublicSite\Catalog\CatalogController::class, 'category'])->name('catalog.category');
 Route::get('/produk/{product:slug}', [\App\Http\Controllers\PublicSite\Catalog\ProductController::class, 'show'])->name('products.show');
 Route::post('/produk/{product:slug}/estimasi', \App\Http\Controllers\PublicSite\Catalog\PriceEstimateController::class)->name('products.estimate');
+
 // PRD-03 ORD
-// PRD-03 ORD
+Route::post('/lampiran', [\App\Http\Controllers\PublicSite\Ordering\AttachmentController::class, 'store'])->middleware('throttle:30,1')->name('attachments.store');
+Route::delete('/lampiran/{attachment}', [\App\Http\Controllers\PublicSite\Ordering\AttachmentController::class, 'destroy'])->name('attachments.destroy');
 Route::get('/custom-order', [\App\Http\Controllers\PublicSite\Ordering\CustomOrderController::class, 'create'])->name('custom-orders.create');
 Route::post('/custom-order', [\App\Http\Controllers\PublicSite\Ordering\CustomOrderController::class, 'store'])->middleware('throttle:5,10')->name('custom-orders.store');
 Route::get('/custom-order/berhasil/{code}', [\App\Http\Controllers\PublicSite\Ordering\CustomOrderController::class, 'success'])->name('custom-orders.success');
