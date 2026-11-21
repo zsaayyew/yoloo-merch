@@ -5,11 +5,14 @@
             <p class="inline-flex rounded-full border border-[#181818]/20 bg-white/50 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em]">Your Personal Merchandise Solution</p>
             <h1 id="home-hero-title" class="mt-6 text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">Bawa idemu menjadi merchandise.</h1>
             <p class="mt-5 max-w-xl text-base leading-7 sm:text-lg sm:leading-8">Jelajahi layanan merchandise custom dan printing, lalu temukan pilihan yang tersedia di katalog YOLOO Merch.</p>
-            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 @if (\Illuminate\Support\Facades\Route::has('catalog.index'))
-                    <a href="{{ route('catalog.index') }}" class="inline-flex items-center justify-center rounded-full bg-[#181818] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#333] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Jelajahi Katalog <span aria-hidden="true" class="ml-2">→</span></a>
+                    <a href="{{ route('catalog.index') }}" class="inline-flex min-h-11 items-center justify-center rounded-full bg-[#181818] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#333] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Jelajahi Katalog <span aria-hidden="true" class="ml-2">→</span></a>
                 @endif
-                <a href="{{ route('about') }}" class="inline-flex items-center justify-center rounded-full border-2 border-[#181818]/70 px-6 py-3 text-sm font-bold text-[#181818] transition hover:bg-white/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Kenali YOLOO Merch</a>
+                @if (\Illuminate\Support\Facades\Route::has('custom-orders.create'))
+                    <a href="{{ route('custom-orders.create') }}" class="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#181818] bg-[#58C0C8] px-6 py-3 text-sm font-bold text-[#181818] transition hover:bg-[#45aeb5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Ajukan Pesanan Custom</a>
+                @endif
+                <a href="{{ route('about') }}" class="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-[#181818]/70 px-6 py-3 text-sm font-semibold text-[#181818] transition hover:bg-white/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Kenali YOLOO Merch</a>
             </div>
         </div>
         <div class="relative mx-auto w-full max-w-[28rem]">

@@ -6,7 +6,9 @@
                 <span aria-hidden="true" class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#58C0C8]/25 text-2xl">▧</span>
                 <h2 class="mt-5 text-xl font-extrabold text-[#181818]">Galeri sedang disiapkan</h2>
                 <p class="mx-auto mt-2 max-w-lg leading-7 text-[#181818]/70">Foto akan tampil setelah konten galeri dipublikasikan.</p>
-                <a href="{{ route('catalog.index') }}" class="mt-6 inline-flex rounded-full bg-[#14747b] px-5 py-3 text-sm font-bold text-white hover:bg-[#105d62]">Jelajahi katalog <span aria-hidden="true" class="ml-2">→</span></a>
+                @if (\Illuminate\Support\Facades\Route::has('catalog.index'))
+                    <a href="{{ route('catalog.index') }}" class="mt-6 inline-flex min-h-11 items-center rounded-full bg-[#14747b] px-5 py-3 text-sm font-bold text-white hover:bg-[#105d62]">Jelajahi katalog <span aria-hidden="true" class="ml-2">→</span></a>
+                @endif
             </div>
         @else
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-gallery-grid>
