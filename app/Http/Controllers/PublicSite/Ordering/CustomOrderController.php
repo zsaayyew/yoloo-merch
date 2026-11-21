@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PublicSite\CustomOrderRequest;
 use App\Models\OrderRequest;
 use App\Models\Product;
+use App\Services\Ordering\AttachmentService;
 use App\Services\Ordering\CustomRequestSubmissionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,16 +23,20 @@ class CustomOrderController extends Controller
 
     public function __construct(
         private readonly CustomRequestSubmissionService $submissionService,
+        private readonly AttachmentService $attachmentService,
     ) {}
 
     public function create(Request $request): View
     {
         $product = $this->findReferenceProduct($request->query('produk'));
         $token = $this->submissionService->issueToken($request->session()->getId());
+        $uploadToken = $this->attachmentService->uploadToken($request->session());
 
         return view('public.custom-orders.create', [
             'product' => $product,
             'submissionToken' => $token->token,
+            // File yang sudah diunggah tetap tampil jika formulir kembali karena error validasi.
+            'attachments' => $this->attachmentService->pendingForCustomOrder($uploadToken),
         ]);
     }
 
@@ -40,7 +45,12 @@ class CustomOrderController extends Controller
         $data = $request->validated();
         $product = $this->findReferenceProduct($data['product_slug'] ?? null);
 
-        $orderRequest = $this->submissionService->submit($data, $product, $request->session()->getId());
+        $orderRequest = $this->submissionService->submit(
+            $data,
+            $product,
+            $request->session()->getId(),
+            $this->attachmentService->uploadToken($request->session()),
+        );
 
         // Simpan kode di session supaya halaman berhasil hanya bisa dibuka sesi pengirim.
         $codes = $request->session()->get(self::SESSION_KEY, []);
@@ -54,7 +64,7 @@ class CustomOrderController extends Controller
     {
         abort_unless(in_array($code, $request->session()->get(self::SESSION_KEY, []), true), 404);
 
-        $orderRequest = OrderRequest::with('customer')->where('code', $code)->firstOrFail();
+        $orderRequest = OrderRequest::with(['customer', 'attachments'])->where('code', $code)->firstOrFail();
 
         return view('public.custom-orders.success', [
             'orderRequest' => $orderRequest,

@@ -3,7 +3,7 @@
     Domain  : PRD-03 ORD (Raisyah)
     Catatan : ORD-FR-010, ORD-FR-012, ORD-FR-013, ORD-FR-017. Tidak ada harga final,
               QRIS, atau instruksi pembayaran di halaman ini.
-    Status  : diimplementasikan (unggah file referensi menyusul di ORD-FR-011).
+    Status  : diimplementasikan.
 --}}
 @extends('layouts.public')
 
@@ -49,7 +49,7 @@
 
             @include('public.custom-orders.sections.product-reference')
             @include('public.custom-orders.sections.requirements')
-            {{-- @include('public.custom-orders.sections.reference-files')  -- ORD-FR-011, menyusul --}}
+            @include('public.custom-orders.sections.reference-files')
             @include('public.custom-orders.sections.contact-form')
             @include('public.custom-orders.sections.agreement')
 

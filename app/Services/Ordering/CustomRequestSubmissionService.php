@@ -20,7 +20,8 @@ use Illuminate\Validation\ValidationException;
  *   1. kunci dan cek token sekali pakai
  *   2. cari/buat pelanggan dari nomor WhatsApp
  *   3. buat order_requests dengan status "new" dan kode REQ-YYMMDD-XXXX
- *   4. tandai token terpakai
+ *   4. pindahkan lampiran sementara milik sesi ke request ini
+ *   5. tandai token terpakai
  * Setelah tersimpan, ORD tidak mengubah status lagi (itu tugas FIN).
  */
 class CustomRequestSubmissionService
@@ -29,6 +30,7 @@ class CustomRequestSubmissionService
 
     public function __construct(
         private readonly OrderCodeGenerator $codeGenerator,
+        private readonly AttachmentService $attachmentService,
     ) {}
 
     /** Buat token baru untuk satu kali tampil formulir. */
@@ -50,9 +52,9 @@ class CustomRequestSubmissionService
      *
      * @throws ValidationException jika token tidak valid/kedaluwarsa
      */
-    public function submit(array $data, ?Product $product, string $sessionId): OrderRequest
+    public function submit(array $data, ?Product $product, string $sessionId, ?string $uploadToken = null): OrderRequest
     {
-        return DB::transaction(function () use ($data, $product, $sessionId) {
+        return DB::transaction(function () use ($data, $product, $sessionId, $uploadToken) {
             $token = SubmissionToken::query()
                 ->where('token', $data['submission_token'])
                 ->where('form_type', SubmissionToken::TYPE_CUSTOM_ORDER)
@@ -73,6 +75,10 @@ class CustomRequestSubmissionService
 
             $customer = $this->findOrCreateCustomer($data);
             $orderRequest = $this->createRequest($data, $customer, $product);
+
+            if ($uploadToken) {
+                $this->attachmentService->attachToRequest($orderRequest, $uploadToken);
+            }
 
             $token->update([
                 'used_at' => now(),
