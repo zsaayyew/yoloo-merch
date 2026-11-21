@@ -18,9 +18,9 @@ class PhoneNumber
         $digits = preg_replace('/\D+/', '', $number) ?? '';
 
         if (str_starts_with($digits, '0')) {
-            $digits = '62' . substr($digits, 1);
+            $digits = '62'.substr($digits, 1);
         } elseif (str_starts_with($digits, '8')) {
-            $digits = '62' . $digits;
+            $digits = '62'.$digits;
         }
 
         return $digits;

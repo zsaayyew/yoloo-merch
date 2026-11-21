@@ -13,8 +13,14 @@ class EnsureUserHasRole
      *
      * @param  Closure(Request): (Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
+        $user = $request->user();
+
+        if ($user === null || ! $user->hasRole(...$roles)) {
+            abort(403, 'Anda tidak memiliki akses ke halaman ini.');
+        }
+
         return $next($request);
     }
 }

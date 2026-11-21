@@ -27,10 +27,13 @@ use RuntimeException;
 class OrderCodeGenerator
 {
     public const PREFIX_ORDER = 'WEB';
+
     public const PREFIX_REQUEST = 'REQ';
 
     private const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
     private const RANDOM_LENGTH = 4;
+
     private const MAX_ATTEMPTS = 10;
 
     /** Kode unik untuk order direct purchase (tabel orders). */
@@ -77,7 +80,7 @@ class OrderCodeGenerator
             }
         }
 
-        throw new RuntimeException("Gagal membuat kode {$prefix} unik setelah " . self::MAX_ATTEMPTS . ' percobaan.');
+        throw new RuntimeException("Gagal membuat kode {$prefix} unik setelah ".self::MAX_ATTEMPTS.' percobaan.');
     }
 
     private function randomPart(): string
