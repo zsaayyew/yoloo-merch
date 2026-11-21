@@ -1,32 +1,23 @@
-{{--
-    PAGE-CP-001 - Section 'featured-products' (Beranda)
-    Domain  : PRD-01 CP  - Company Profile (Bertrand)
-    Catatan : Partial khusus halaman ini; di-include dari file halaman utama.
-    Status  : fallback katalog diimplementasikan; integrasi produk menunggu kontrak ADM/CAT.
---}}
-
-<section aria-labelledby="home-featured-products-title" class="bg-zinc-50">
-    <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-        <div class="grid gap-6 rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-10">
-            <div class="max-w-2xl">
-                <p class="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                    Katalog YOLOO Merch
-                </p>
-                <h2 id="home-featured-products-title" class="mt-3 text-2xl font-bold tracking-tight text-zinc-950 sm:text-3xl">
-                    Jelajahi pilihan produk
-                </h2>
-                <p class="mt-3 text-base leading-7 text-zinc-700">
-                    Kunjungi katalog untuk melihat produk dan kategori yang tersedia.
-                </p>
+{{-- PAGE-CP-001: produk unggulan hanya dirender jika CAT memberikan data terkonfirmasi. --}}
+@if (!empty($featuredProducts) && $featuredProducts->isNotEmpty())
+    <section aria-labelledby="home-featured-title" class="bg-[#f8f8f8]">
+        <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+            <div class="flex flex-wrap items-end justify-between gap-4">
+                <div><p class="text-sm font-extrabold uppercase tracking-[0.16em] text-[#14747b]">Dari katalog</p><h2 id="home-featured-title" class="mt-2 text-3xl font-black tracking-tight text-[#181818] sm:text-4xl">Produk yang tersedia</h2></div>
+                <a href="{{ route('catalog.index') }}" class="font-bold text-[#124f53] underline decoration-[#58C0C8] decoration-2 underline-offset-4">Lihat semua produk <span aria-hidden="true">→</span></a>
             </div>
-
-            {{-- Area kartu produk unggulan CAT ditambahkan setelah kontrak pemilihan dan data disepakati. --}}
-            <div>
-                <a href="{{ route('catalog.index') }}"
-                   class="inline-flex w-full items-center justify-center rounded-lg bg-zinc-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 sm:w-auto">
-                    Lihat Katalog
-                </a>
+            <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                @foreach ($featuredProducts as $product)
+                    <x-catalog.product-card :product="$product" :image="$featuredImages[$product->id] ?? null" :pricing="$featuredPricing[$product->id] ?? null" />
+                @endforeach
             </div>
         </div>
-    </div>
-</section>
+    </section>
+@else
+    <section aria-labelledby="home-featured-title" class="bg-[#f8f8f8]">
+        <div class="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-12 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+            <div><p class="text-sm font-extrabold uppercase tracking-[0.16em] text-[#14747b]">Dari katalog</p><h2 id="home-featured-title" class="mt-2 text-2xl font-black text-[#181818]">Temukan pilihan di katalog</h2><p class="mt-2 max-w-2xl leading-7 text-[#181818]/70">Produk aktif dari CAT akan muncul di sini bila tersedia.</p></div>
+            @if (\Illuminate\Support\Facades\Route::has('catalog.index'))<a href="{{ route('catalog.index') }}" class="inline-flex shrink-0 items-center justify-center rounded-full bg-[#14747b] px-5 py-3 text-sm font-bold text-white hover:bg-[#105d62] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181818]">Lihat Katalog</a>@endif
+        </div>
+    </section>
+@endif
