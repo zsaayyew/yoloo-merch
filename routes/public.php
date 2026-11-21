@@ -15,6 +15,9 @@
 | Larangan   : TIDAK ADA route cek status pesanan (ORD-BR-013).
 */
 
+use App\Http\Controllers\PublicSite\Catalog\CatalogController;
+use App\Http\Controllers\PublicSite\Catalog\PriceEstimateController;
+use App\Http\Controllers\PublicSite\Catalog\ProductController;
 use App\Http\Controllers\PublicSite\CompanyProfile\AboutController;
 use App\Http\Controllers\PublicSite\CompanyProfile\ContactController;
 use App\Http\Controllers\PublicSite\CompanyProfile\GalleryController;
@@ -30,8 +33,8 @@ Route::get('/galeri', [GalleryController::class, 'index'])->name('gallery');
 Route::get('/kontak', [ContactController::class, 'index'])->name('contact');
 
 // PRD-02 CAT
-Route::get('/produk', [\App\Http\Controllers\PublicSite\Catalog\CatalogController::class, 'index'])->name('catalog.index');
-Route::get('/produk/kategori/{category:slug}', [\App\Http\Controllers\PublicSite\Catalog\CatalogController::class, 'category'])->name('catalog.category');
-Route::get('/produk/{product:slug}', [\App\Http\Controllers\PublicSite\Catalog\ProductController::class, 'show'])->name('products.show');
-Route::post('/produk/{product:slug}/estimasi', \App\Http\Controllers\PublicSite\Catalog\PriceEstimateController::class)->name('products.estimate');
+Route::get('/produk', [CatalogController::class, 'index'])->name('catalog.index');
+Route::get('/produk/kategori/{category:slug}', [CatalogController::class, 'category'])->name('catalog.category');
+Route::get('/produk/{product:slug}', [ProductController::class, 'show'])->name('products.show');
+Route::post('/produk/{product:slug}/estimasi', PriceEstimateController::class)->name('products.estimate');
 // PRD-03 ORD

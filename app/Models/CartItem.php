@@ -62,6 +62,6 @@ class CartItem extends Model
         $ids = array_map('intval', $optionValueIds);
         sort($ids);
 
-        return hash('sha256', $productId . '|' . implode(',', $ids));
+        return hash('sha256', $productId.'|'.implode(',', $ids));
     }
 }

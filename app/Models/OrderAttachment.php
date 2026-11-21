@@ -15,12 +15,16 @@ class OrderAttachment extends Model
 {
     /** Disk penyimpanan (tidak publik). */
     public const DISK = 'local';
+
     public const TEMP_DIR = 'tmp-uploads';
+
     public const FINAL_DIR = 'order-attachments';
 
     /** Batas upload (ORD-BR-010). */
     public const MAX_FILES = 5;
+
     public const MAX_SIZE_KB = 10240; // 10 MB
+
     public const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'application/pdf'];
 
     /** File sementara dihapus setelah 24 jam. */

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SubmissionToken extends Model
 {
     public const TYPE_CHECKOUT = 'checkout';
+
     public const TYPE_CUSTOM_ORDER = 'custom_order';
 
     public const LIFETIME_HOURS = 2;
