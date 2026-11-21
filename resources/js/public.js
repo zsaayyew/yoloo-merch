@@ -3,6 +3,7 @@
 // Status : placeholder, belum diimplementasikan.
 
 import './app';
+import './public/product-configurator.js';
 import { initSubmitGuard } from './shared/submit-guard';
 
 initSubmitGuard();

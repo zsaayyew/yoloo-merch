@@ -6,9 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 /*
  * Tabel   : products
- * Domain  : PRD-04 ADM - Admin Dashboard & CMS (Taufik)
- * Catatan : kerangka. Kolom final ditulis pemilik domain saat fitur dikerjakan,
- *           mengacu ke Master PRD (bagian J Data requirements) dan ERD bersama.
+ * Domain  : PRD-02 CAT - Catalog & Customization (Haidir)
+ * Catatan : Hanya produk berstatus active pada kategori aktif yang tampil publik.
+ *           price_model: fixed | starting_from | calculator | quotation (PriceModel).
+ *           allows_direct_purchase=false berarti produk hanya lewat permintaan penawaran.
  */
 return new class extends Migration
 {
@@ -16,7 +17,16 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            // TODO: kolom sesuai Master PRD dan ERD final.
+            // Produk tidak pernah dihapus permanen (diarsipkan), jadi restrict aman.
+            $table->foreignId('category_id')->constrained('categories')->restrictOnDelete();
+            $table->string('name', 160);
+            $table->string('slug', 180)->unique();
+            $table->text('description')->nullable();
+            // Spesifikasi bebas: {"Bahan": "Vinil", "Kode": "VK-270"}.
+            $table->json('specifications')->nullable();
+            $table->string('price_model', 30)->default('quotation')->index();
+            $table->boolean('allows_direct_purchase')->default(true);
+            $table->string('status', 20)->default('draft')->index(); // ProductStatus: draft | active | archived
             $table->timestamps();
         });
     }

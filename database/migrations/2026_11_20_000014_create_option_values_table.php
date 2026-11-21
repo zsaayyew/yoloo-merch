@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 /*
  * Tabel   : option_values
- * Domain  : PRD-04 ADM - Admin Dashboard & CMS (Taufik)
- * Catatan : kerangka. Kolom final ditulis pemilik domain saat fitur dikerjakan,
- *           mengacu ke Master PRD (bagian J Data requirements) dan ERD bersama.
+ * Domain  : PRD-02 CAT - Catalog & Customization (Haidir)
+ * Catatan : forbidden_combinations berisi daftar id nilai opsi yang tidak boleh
+ *           dipilih bersamaan, mis. [8] pada nilai 7 (CAT-FR-006).
  */
 return new class extends Migration
 {
@@ -16,8 +16,14 @@ return new class extends Migration
     {
         Schema::create('option_values', function (Blueprint $table) {
             $table->id();
-            // TODO: kolom sesuai Master PRD dan ERD final.
+            $table->foreignId('option_group_id')->constrained('option_groups')->cascadeOnDelete();
+            $table->string('label', 120);
+            $table->boolean('is_active')->default(true)->index();
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->json('forbidden_combinations')->nullable();
             $table->timestamps();
+
+            $table->index(['option_group_id', 'sort_order']);
         });
     }
 
