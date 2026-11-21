@@ -90,4 +90,16 @@ class OrderAttachment extends Model
     {
         return str_starts_with($this->mime_type, 'image/');
     }
+
+    /** Contoh: 532 KB, 2,4 MB. */
+    public function sizeForHumans(): string
+    {
+        $kb = $this->size_bytes / 1024;
+
+        if ($kb < 1024) {
+            return number_format(max($kb, 1), 0, ',', '.') . ' KB';
+        }
+
+        return number_format($kb / 1024, 1, ',', '.') . ' MB';
+    }
 }
