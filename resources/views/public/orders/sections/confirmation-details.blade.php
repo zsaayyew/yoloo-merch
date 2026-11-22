@@ -36,4 +36,5 @@
         'quantity' => $item->quantity,
         'unit_price' => $item->unit_price,
         'subtotal' => $item->subtotal,
+        'files' => $item->attachments->pluck('original_name')->all(),
     ])" />

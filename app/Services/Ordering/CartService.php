@@ -29,6 +29,7 @@ class CartService
 
     public function __construct(
         private readonly ConfigurationPayloadBuilder $payloadBuilder,
+        private readonly AttachmentService $attachmentService,
     ) {}
 
     /** Keranjang aktif milik pengunjung ini, atau null jika belum ada / kedaluwarsa. */
@@ -88,7 +89,7 @@ class CartService
                     $existing->quantity + $payload['quantity'],
                 );
                 $existing->update($this->attributesFromPayload($merged, $hash));
-                $replace?->delete();
+                $this->retire($replace, $existing);
 
                 return $existing;
             }
@@ -101,7 +102,7 @@ class CartService
             }
 
             $item = $cart->items()->create($this->attributesFromPayload($payload, $hash));
-            $replace?->delete();
+            $this->retire($replace, $item);
 
             return $item;
         });
@@ -130,8 +131,20 @@ class CartService
 
     public function remove(CartItem $item): void
     {
-        $item->attachments()->each(fn ($attachment) => $attachment->update(['cart_item_id' => null]));
+        // File desain milik item ikut dihapus supaya tidak menjadi file yatim.
+        $this->attachmentService->deleteForCartItem($item);
         $item->delete();
+    }
+
+    /** Hapus item lama hasil "Ubah opsi"; lampiran desainnya dipindah ke item penggantinya. */
+    private function retire(?CartItem $old, CartItem $replacement): void
+    {
+        if (! $old || $old->id === $replacement->id) {
+            return;
+        }
+
+        $this->attachmentService->moveToCartItem($old, $replacement);
+        $old->delete();
     }
 
     /** Pastikan item memang milik keranjang pengunjung ini. */

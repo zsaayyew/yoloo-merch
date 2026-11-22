@@ -26,8 +26,8 @@ use Throwable;
  *   2. hitung ulang semua item lewat CAT; jika ada yang tidak tersedia -> tolak
  *   3. bandingkan dengan harga yang dilihat pelanggan di ringkasan; jika beda -> tolak,
  *      pelanggan diminta menyetujui ulang
- *   4. cari/buat pelanggan, buat order (direct, website, awaiting_confirmation, unpaid)
- *      dan item snapshot
+ *   4. cari/buat pelanggan, buat order (direct, website, awaiting_confirmation, unpaid),
+ *      item snapshot, dan pindahkan lampiran desain per item
  *   5. tandai token terpakai, kosongkan keranjang
  * Setelah tersimpan, semua perubahan status dan harga final dilakukan FIN.
  * QRIS / instruksi pembayaran TIDAK pernah dibaca atau dibuat di sini.
@@ -42,6 +42,7 @@ class OrderSubmissionService
     public function __construct(
         private readonly CartService $cartService,
         private readonly OrderCodeGenerator $codeGenerator,
+        private readonly AttachmentService $attachmentService,
     ) {}
 
     public function issueToken(string $sessionId): SubmissionToken
@@ -115,7 +116,7 @@ class OrderSubmissionService
             foreach ($summary['rows'] as $row) {
                 $item = $row['item'];
 
-                $order->items()->create([
+                $orderItem = $order->items()->create([
                     'product_id' => $item->product_id,
                     'product_name_snapshot' => $item->product_name_snapshot,
                     'options_snapshot' => $item->options_snapshot ?? [],
@@ -125,6 +126,8 @@ class OrderSubmissionService
                     'subtotal' => (int) $row['subtotal'],
                     'price_status' => OrderItem::PRICE_ESTIMATE,
                 ]);
+
+                $this->attachmentService->attachToOrderItem($order, $orderItem, $item->id);
             }
 
             $submission->update(['used_at' => now(), 'order_id' => $order->id]);

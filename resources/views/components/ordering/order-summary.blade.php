@@ -2,7 +2,8 @@
     Component : <x-ordering.order-summary :items="..." :total="..." />
     Domain    : PRD-03 ORD (Raisyah)
     Catatan   : Daftar item + total estimasi. Dipakai di checkout, ringkasan, dan konfirmasi.
-                $items: iterable berisi array [name, options, quantity, unit_price, subtotal].
+                $items: iterable berisi array [name, options, quantity, unit_price, subtotal, files?].
+                files (opsional): daftar nama file lampiran desain item.
                 Semua angka berlabel Estimasi. Tidak menampilkan QRIS/instruksi pembayaran.
     Status    : diimplementasikan.
 --}}
@@ -23,6 +24,11 @@
                         {{ number_format($line['quantity'], 0, ',', '.') }} pcs
                         &times; estimasi {{ \App\Support\Money::format((int) $line['unit_price']) }}
                     </p>
+                    @if (! empty($line['files']))
+                        <p class="mt-1 text-xs text-gray-500">
+                            File desain: {{ collect($line['files'])->join(', ') }}
+                        </p>
+                    @endif
                 </div>
                 <p class="shrink-0 font-semibold text-gray-900">{{ \App\Support\Money::format((int) $line['subtotal']) }}</p>
             </li>
