@@ -1,7 +1,7 @@
 /**
  * PRD-03 ORD — Unggah lampiran satu per satu (ORD-FR-011).
  *
- * Mencari elemen [data-file-upload] (lihat custom-orders/sections/reference-files.blade.php),
+ * Mencari elemen [data-file-upload] (komponen <x-form.file-upload>),
  * mengunggah setiap file yang dipilih ke route attachments.store, dan menampilkan daftarnya.
  * Selama ada file yang masih diunggah, tombol kirim formulir dikunci lewat
  * form.dataset.submitBlocked (dibaca shared/submit-guard.js).
@@ -86,16 +86,24 @@ function setup(root) {
 
     const currentCount = () => list.querySelectorAll('[data-attachment-id]').length;
 
+    // Satu formulir bisa berisi beberapa kotak upload (misalnya satu per produk di checkout),
+    // jadi jumlah unggahan yang berjalan dihitung bersama di form.dataset.uploadsPending.
+    const changeFormPending = (delta) => {
+        if (!form) {
+            return;
+        }
+        const total = Math.max(0, Number(form.dataset.uploadsPending || 0) + delta);
+        form.dataset.uploadsPending = String(total);
+        if (total > 0) {
+            form.dataset.submitBlocked = 'true';
+        } else {
+            delete form.dataset.submitBlocked;
+        }
+    };
+
     const refresh = () => {
         if (counter) {
             counter.textContent = String(currentCount());
-        }
-        if (form) {
-            if (pending > 0) {
-                form.dataset.submitBlocked = 'true';
-            } else {
-                delete form.dataset.submitBlocked;
-            }
         }
     };
 
@@ -126,10 +134,14 @@ function setup(root) {
         const placeholder = buildPendingItem(file);
         list.append(placeholder);
         pending += 1;
+        changeFormPending(1);
         refresh();
 
         const body = new FormData();
         body.append('file', file);
+        if (root.dataset.cartItemId) {
+            body.append('cart_item_id', root.dataset.cartItemId); // lampiran desain per item checkout
+        }
 
         try {
             const response = await fetch(uploadUrl, {
@@ -154,6 +166,7 @@ function setup(root) {
             placeholder.remove();
         } finally {
             pending -= 1;
+            changeFormPending(-1);
             refresh();
         }
     }

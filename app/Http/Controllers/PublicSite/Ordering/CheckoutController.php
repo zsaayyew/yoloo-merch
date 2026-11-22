@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PublicSite\CheckoutCustomerRequest;
 use App\Http\Requests\PublicSite\SubmitOrderRequest;
 use App\Models\Order;
+use App\Services\Ordering\AttachmentService;
 use App\Services\Ordering\CartService;
 use App\Services\Ordering\OrderSubmissionService;
 use Illuminate\Http\RedirectResponse;
@@ -26,6 +27,7 @@ class CheckoutController extends Controller
     public function __construct(
         private readonly CartService $cartService,
         private readonly OrderSubmissionService $submissionService,
+        private readonly AttachmentService $attachmentService,
     ) {}
 
     /** PAGE-ORD-002: data pelanggan + informasi pickup. */
@@ -37,8 +39,11 @@ class CheckoutController extends Controller
             return $redirect;
         }
 
+        $this->attachmentService->uploadToken($request->session()); // siapkan token upload sesi
+
         return view('public.checkout.customer', $summary + [
             'customer' => $request->session()->get(self::SESSION_CUSTOMER, []),
+            'itemAttachments' => $this->itemAttachments($summary),
         ]);
     }
 
@@ -72,6 +77,7 @@ class CheckoutController extends Controller
         return view('public.checkout.summary', $summary + [
             'customer' => $customer,
             'submissionToken' => $token->token,
+            'itemAttachments' => $this->itemAttachments($summary),
         ]);
     }
 
@@ -111,9 +117,17 @@ class CheckoutController extends Controller
     {
         abort_unless(in_array($code, $request->session()->get(self::SESSION_ORDER_CODES, []), true), 404);
 
-        $order = Order::with(['customer', 'items'])->where('code', $code)->firstOrFail();
+        $order = Order::with(['customer', 'items.attachments'])->where('code', $code)->firstOrFail();
 
         return view('public.orders.success', ['order' => $order]);
+    }
+
+    /** Lampiran desain sementara, dikelompokkan per cart_item_id. */
+    private function itemAttachments(array $summary): \Illuminate\Support\Collection
+    {
+        return $this->attachmentService->pendingForCartItems(
+            $summary['rows']->map(fn (array $row) => $row['item']->id)->all()
+        );
     }
 
     private function guardCart(array $summary): ?RedirectResponse
