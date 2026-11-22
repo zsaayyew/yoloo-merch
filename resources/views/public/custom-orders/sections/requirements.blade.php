@@ -26,7 +26,7 @@
                 Jumlah <span class="text-red-600">*</span>
             </label>
             <input type="number" id="quantity" name="quantity" min="1" step="1" required
-                value="{{ old('quantity') }}" placeholder="Contoh: 100"
+                value="{{ old('quantity', $prefillQuantity ?? '') }}" placeholder="Contoh: 100"
                 class="{{ $inputClass }} @error('quantity') border-red-500 @else border-gray-300 @enderror">
             @error('quantity')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
