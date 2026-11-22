@@ -33,6 +33,14 @@ class CustomOrderRequest extends FormRequest
             $merge['budget'] = preg_replace('/\D+/', '', (string) $this->input('budget'));
         }
 
+        // Opsi referensi dari tombol "Minta penawaran" (CAT); nilai kosong dibuang.
+        if (is_array($this->input('option_value_ids'))) {
+            $merge['option_value_ids'] = array_values(array_filter(
+                $this->input('option_value_ids'),
+                fn ($id) => $id !== null && $id !== '',
+            ));
+        }
+
         foreach (['name', 'email', 'description', 'specification', 'notes'] as $field) {
             if (is_string($this->input($field))) {
                 $merge[$field] = trim($this->input($field));
@@ -48,6 +56,8 @@ class CustomOrderRequest extends FormRequest
             'submission_token' => ['required', 'string', 'size:64'],
             'website' => ['prohibited'], // honeypot: harus kosong
             'product_slug' => ['nullable', 'string', 'max:255'],
+            'option_value_ids' => ['nullable', 'array', 'max:20'],
+            'option_value_ids.*' => ['integer', 'distinct'],
 
             'description' => ['required', 'string', 'min:20', 'max:2000'],
             'quantity' => ['required', 'integer', 'min:1', 'max:100000'],

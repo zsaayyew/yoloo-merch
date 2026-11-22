@@ -20,6 +20,21 @@ class AddCartItemRequest extends FormRequest
         return true;
     }
 
+    /**
+     * Opsi opsional yang tidak dipilih bisa terkirim sebagai string kosong
+     * (option_value_ids[]=""). Nilai kosong dibuang supaya tidak dianggap pilihan tidak valid.
+     */
+    protected function prepareForValidation(): void
+    {
+        $ids = $this->input('option_value_ids');
+
+        if (is_array($ids)) {
+            $this->merge([
+                'option_value_ids' => array_values(array_filter($ids, fn ($id) => $id !== null && $id !== '')),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [
