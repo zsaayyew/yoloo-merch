@@ -104,6 +104,11 @@ class CheckoutController extends Controller
             return redirect()->route($target)->withErrors($e->errors());
         }
 
+        // Email hanya untuk kiriman baru, bukan saat tombol ditekan dua kali.
+        if ($order->wasRecentlyCreated) {
+            $this->submissionService->sendReceipt($order, $customer['email'] ?? null);
+        }
+
         $codes = $request->session()->get(self::SESSION_ORDER_CODES, []);
         $codes[] = $order->code;
         $request->session()->put(self::SESSION_ORDER_CODES, array_values(array_unique($codes)));
@@ -119,7 +124,10 @@ class CheckoutController extends Controller
 
         $order = Order::with(['customer', 'items.attachments'])->where('code', $code)->firstOrFail();
 
-        return view('public.orders.success', ['order' => $order]);
+        return view('public.orders.success', [
+            'order' => $order,
+            'whatsappUrl' => $this->submissionService->whatsappUrl($order->code, $order->customer->name),
+        ]);
     }
 
     /** Lampiran desain sementara, dikelompokkan per cart_item_id. */

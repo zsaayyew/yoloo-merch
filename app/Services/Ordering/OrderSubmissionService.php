@@ -6,13 +6,18 @@ use App\Enums\OrderChannel;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Enums\PaymentStatus;
+use App\Mail\OrderSubmissionReceived;
 use App\Models\Cart;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderRequest;
 use App\Models\SubmissionToken;
+use App\Support\PhoneNumber;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -37,7 +42,10 @@ class OrderSubmissionService
     private const MAX_CODE_ATTEMPTS = 3;
 
     /** Kunci pengaturan usaha yang disepakati (AI_CONTEXT bagian 7 poin 10). */
-    private const PICKUP_KEYS = ['pickup_location', 'pickup_hours', 'address', 'operating_hours'];
+    private const SETTING_KEYS = ['pickup_location', 'pickup_hours', 'address', 'operating_hours', 'whatsapp_number', 'business_name'];
+
+    /** @var array<string, string|null>|null cache pengaturan usaha per request */
+    private ?array $settings = null;
 
     public function __construct(
         private readonly CartService $cartService,
@@ -148,20 +156,70 @@ class OrderSubmissionService
      */
     public function pickupInfo(): array
     {
-        $values = [];
-
-        try {
-            if (Schema::hasColumns('site_settings', ['key', 'value'])) {
-                $values = DB::table('site_settings')->whereIn('key', self::PICKUP_KEYS)->pluck('value', 'key')->all();
-            }
-        } catch (Throwable) {
-            $values = [];
-        }
+        $values = $this->settings();
 
         return [
             'location' => filled($values['pickup_location'] ?? null) ? $values['pickup_location'] : ($values['address'] ?? null),
             'hours' => filled($values['pickup_hours'] ?? null) ? $values['pickup_hours'] : ($values['operating_hours'] ?? null),
         ];
+    }
+
+    /**
+     * Tautan WhatsApp usaha berisi kode dan nama pelanggan (ORD-FR-016).
+     * Null jika nomor WhatsApp usaha belum diatur ADM, sehingga tombol tidak ditampilkan.
+     */
+    public function whatsappUrl(string $code, string $customerName, bool $isCustomRequest = false): ?string
+    {
+        $number = PhoneNumber::normalize((string) ($this->settings()['whatsapp_number'] ?? ''));
+
+        if (! PhoneNumber::isValid($number)) {
+            return null;
+        }
+
+        $message = $isCustomRequest
+            ? "Halo YOLOO Merch, saya {$customerName}. Saya baru mengirim permintaan custom order dengan kode {$code}."
+            : "Halo YOLOO Merch, saya {$customerName}. Saya baru mengirim pesanan dengan kode {$code}.";
+
+        return 'https://wa.me/' . $number . '?text=' . rawurlencode($message);
+    }
+
+    /**
+     * Kirim email tanda terima jika pelanggan mengisi email (ORD-FR-015).
+     * Dipanggil SETELAH transaksi database selesai. Kegagalan email tidak membatalkan pesanan,
+     * hanya dicatat di log. Email tidak berisi QRIS atau instruksi pembayaran.
+     */
+    public function sendReceipt(Order|OrderRequest $submission, ?string $email): void
+    {
+        if (blank($email)) {
+            return;
+        }
+
+        try {
+            Mail::to($email)->send(new OrderSubmissionReceived($submission, $this->pickupInfo()));
+        } catch (Throwable $e) {
+            Log::warning('Email tanda terima gagal dikirim.', [
+                'code' => $submission->code,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /** @return array<string, string|null> */
+    private function settings(): array
+    {
+        if ($this->settings !== null) {
+            return $this->settings;
+        }
+
+        try {
+            $this->settings = Schema::hasColumns('site_settings', ['key', 'value'])
+                ? DB::table('site_settings')->whereIn('key', self::SETTING_KEYS)->pluck('value', 'key')->all()
+                : [];
+        } catch (Throwable) {
+            $this->settings = [];
+        }
+
+        return $this->settings;
     }
 
     private function createOrder(Customer $customer, int $estimatedTotal, ?string $notes): Order
