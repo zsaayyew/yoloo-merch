@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Services\Catalog\ConfigurationPayloadBuilder;
 use App\Services\Ordering\AttachmentService;
 use App\Services\Ordering\CustomRequestSubmissionService;
+use App\Services\Ordering\OrderSubmissionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -27,6 +28,7 @@ class CustomOrderController extends Controller
         private readonly CustomRequestSubmissionService $submissionService,
         private readonly AttachmentService $attachmentService,
         private readonly ConfigurationPayloadBuilder $payloadBuilder,
+        private readonly OrderSubmissionService $orderSubmissionService,
     ) {}
 
     public function create(Request $request): View
@@ -65,6 +67,11 @@ class CustomOrderController extends Controller
             $this->attachmentService->uploadToken($request->session()),
         );
 
+        // Email hanya untuk kiriman baru, bukan saat tombol ditekan dua kali.
+        if ($orderRequest->wasRecentlyCreated) {
+            $this->orderSubmissionService->sendReceipt($orderRequest, $data['email'] ?? null);
+        }
+
         // Simpan kode di session supaya halaman berhasil hanya bisa dibuka sesi pengirim.
         $codes = $request->session()->get(self::SESSION_KEY, []);
         $codes[] = $orderRequest->code;
@@ -81,6 +88,11 @@ class CustomOrderController extends Controller
 
         return view('public.custom-orders.success', [
             'orderRequest' => $orderRequest,
+            'whatsappUrl' => $this->orderSubmissionService->whatsappUrl(
+                $orderRequest->code,
+                $orderRequest->customer->name,
+                isCustomRequest: true,
+            ),
         ]);
     }
 
