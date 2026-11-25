@@ -1035,7 +1035,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `users_email_unique` (`email`),
   KEY `users_role_id_foreign` (`role_id`),
   CONSTRAINT `users_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1044,7 +1044,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,1,'Owner YOLOO Merch','owner@yoloo.test','2026-11-21 06:57:34','$2y$12$R00Wj1bAh9Kcs3FcDwFjZOvZTuI4ain8txTIpgzmo2TM5PcAIYgla',1,NULL,'2026-11-21 06:57:34','2026-11-21 06:57:34');
+INSERT INTO `users` VALUES (1,1,'Owner YOLOO Merch','owner@yoloo.test','2026-11-21 06:57:34','$2y$12$R00Wj1bAh9Kcs3FcDwFjZOvZTuI4ain8txTIpgzmo2TM5PcAIYgla',1,NULL,'2026-11-21 06:57:34','2026-11-21 06:57:34'),(2,2,'Admin YOLOO Merch','admin@yoloo.test','2026-11-25 06:51:45','$2y$12$DCWTm2phIpIMnHjNgxGor.lOJ44XOusmEJt5kxFFQOYtzUs5g1136',1,NULL,'2026-11-25 06:51:45','2026-11-25 06:51:45');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -1057,7 +1057,7 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-11-25 22:21:53
+-- Dump completed on 2026-11-25 22:51:59
 -- MySQL dump 10.13  Distrib 8.4.3, for Win64 (x86_64)
 --
 -- Host: localhost    Database: yoloo_merch
@@ -1192,4 +1192,4 @@ CREATE TABLE `sessions` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-11-25 22:21:53
+-- Dump completed on 2026-11-25 22:51:59
