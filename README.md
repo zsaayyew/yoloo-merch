@@ -7,6 +7,80 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## YOLOO Merch
+
+Aplikasi Laravel untuk website publik dan panel admin YOLOO Merch. Halaman admin berada di `/admin/login`.
+
+### Akun login admin (development)
+
+Kredensial ini dipakai tim untuk mencoba panel admin di komputer masing-masing:
+
+| Role | Email | Password | Seeder |
+| --- | --- | --- | --- |
+| Owner | `owner@yoloo.test` | `owner12345` | `OwnerUserSeeder` |
+| Admin | `admin@yoloo.test` | `admin12345` | `AdminUserSeeder` |
+
+Keduanya dibuat oleh seeder yang membaca `OWNER_*` dan `ADMIN_*` dari `.env`. Akun Admin berguna untuk menguji tampilan dan hak akses role admin tanpa memakai akun Owner. Kalau login ditolak, pastikan variabelnya terisi lalu jalankan:
+
+```bash
+php artisan config:clear
+php artisan migrate --seed
+```
+
+> Kredensial di atas khusus development. Ganti `OWNER_PASSWORD` dan `ADMIN_PASSWORD` sebelum aplikasi dipakai di server produksi.
+
+### Menyiapkan proyek di Windows
+
+> **Penting — pakai branch `develop`.** Semua kode terbaru (termasuk `database/dumps/yoloo_merch.sql` dan akun contoh) ada di branch `develop`. Branch `main` di GitHub masih tertinggal, jadi `git clone` biasa akan mengambil `main` dan folder `database/` hanya berisi `factories`, `migrations`, `seeders` tanpa `dumps`. Selalu clone dengan `-b develop` (perintah di bawah sudah begitu), atau bila sudah terlanjur clone: `git fetch origin && git checkout develop`.
+
+Prasyarat: Laragon sudah terpasang (PHP, MySQL, Composer), Node.js LTS, dan Git. Jalankan **Laragon → Start All** sebelum mulai.
+
+#### Pilihan 1 — Git Bash / Laragon Terminal (disarankan)
+
+Buka **Laragon → Terminal** (sudah Git Bash, `cp` dan `mysql` dikenali):
+
+```bash
+git clone -b develop https://github.com/zsaayyew/yoloo-merch.git
+cd yoloo-merch
+composer install
+cp .env.example .env
+php artisan key:generate
+mysql -u root < database/dumps/yoloo_merch.sql
+npm install && npm run build
+php artisan serve
+```
+
+#### Pilihan 2 — CMD / PowerShell
+
+Di CMD, `cp` dan `mysql` tidak dikenali, jadi pakai perintah Windows berikut:
+
+```bat
+git clone -b develop https://github.com/zsaayyew/yoloo-merch.git
+cd yoloo-merch
+composer install
+copy .env.example .env
+php artisan key:generate
+"C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysql.exe" -u root < database\dumps\yoloo_merch.sql
+npm install && npm run build
+php artisan serve
+```
+
+Kalau versi MySQL di komputermu berbeda, cek nama foldernya di `C:\laragon\bin\mysql\` lalu sesuaikan path di atas. Alternatif tanpa `mysql` sama sekali: buka **HeidiSQL** (tombol *Database* di Laragon), klik kanan koneksinya, pilih **Run SQL file**, lalu pilih `database\dumps\yoloo_merch.sql`.
+
+#### Kalau tidak memakai dump
+
+Ganti baris `mysql ...` dengan migrasi biasa — hasilnya sama (tabel + role + akun Owner dan Admin):
+
+```bash
+php artisan migrate --seed
+```
+
+#### Selesai
+
+Buka `http://localhost:8000`, panel admin di `http://localhost:8000/admin/login`. Login dengan salah satu akun pada tabel di atas.
+
+Catatan: proyek memakai MySQL dengan nama database `yoloo_merch` dan user `root` tanpa password (standar Laragon). Sesuaikan `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` di `.env` bila konfigurasi MySQL di komputermu berbeda.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

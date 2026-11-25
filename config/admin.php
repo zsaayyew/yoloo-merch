@@ -16,4 +16,18 @@ return [
         'password' => env('OWNER_PASSWORD'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Akun Admin Contoh
+    |--------------------------------------------------------------------------
+    | Dipakai AdminUserSeeder, berguna untuk mencoba panel admin dengan role
+    | admin. Sama seperti Owner, nilainya dibaca lewat config.
+    */
+
+    'admin' => [
+        'name' => env('ADMIN_NAME', 'Admin YOLOO Merch'),
+        'email' => env('ADMIN_EMAIL'),
+        'password' => env('ADMIN_PASSWORD'),
+    ],
+
 ];
