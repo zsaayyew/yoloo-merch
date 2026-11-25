@@ -15,11 +15,12 @@ Aplikasi Laravel untuk website publik dan panel admin YOLOO Merch. Halaman admin
 
 Kredensial ini dipakai tim untuk mencoba panel admin di komputer masing-masing:
 
-| Role | Email | Password |
-| --- | --- | --- |
-| Owner | `owner@yoloo.test` | `owner12345` |
+| Role | Email | Password | Seeder |
+| --- | --- | --- | --- |
+| Owner | `owner@yoloo.test` | `owner12345` | `OwnerUserSeeder` |
+| Admin | `admin@yoloo.test` | `admin12345` | `AdminUserSeeder` |
 
-Akun dibuat oleh `database/seeders/OwnerUserSeeder.php` memakai nilai `OWNER_EMAIL` dan `OWNER_PASSWORD` dari `.env`. Kalau login ditolak, pastikan dua variabel itu terisi lalu jalankan:
+Keduanya dibuat oleh seeder yang membaca `OWNER_*` dan `ADMIN_*` dari `.env`. Akun Admin berguna untuk menguji tampilan dan hak akses role admin tanpa memakai akun Owner. Kalau login ditolak, pastikan variabelnya terisi lalu jalankan:
 
 ```bash
 php artisan config:clear
@@ -28,7 +29,13 @@ php artisan migrate --seed
 
 > Kredensial di atas khusus development. Ganti `OWNER_PASSWORD` sebelum aplikasi dipakai di server produksi.
 
-### Menyiapkan proyek
+### Menyiapkan proyek di Windows
+
+Prasyarat: Laragon sudah terpasang (PHP, MySQL, Composer), Node.js LTS, dan Git. Jalankan **Laragon → Start All** sebelum mulai.
+
+#### Pilihan 1 — Git Bash / Laragon Terminal (disarankan)
+
+Buka **Laragon → Terminal** (sudah Git Bash, `cp` dan `mysql` dikenali):
 
 ```bash
 git clone https://github.com/zsaayyew/yoloo-merch.git
@@ -36,20 +43,41 @@ cd yoloo-merch
 composer install
 cp .env.example .env
 php artisan key:generate
-
-# pilih salah satu: impor dump yang sudah berisi data seed
 mysql -u root < database/dumps/yoloo_merch.sql
-
-# atau bangun dari nol
-php artisan migrate --seed
-
 npm install && npm run build
 php artisan serve
 ```
 
-Buka `http://localhost:8000`, panel admin di `http://localhost:8000/admin/login`.
+#### Pilihan 2 — CMD / PowerShell
 
-Catatan: proyek memakai MySQL dengan nama database `yoloo_merch`. Sesuaikan `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` di `.env` bila konfigurasi MySQL di komputermu berbeda.
+Di CMD, `cp` dan `mysql` tidak dikenali, jadi pakai perintah Windows berikut:
+
+```bat
+git clone https://github.com/zsaayyew/yoloo-merch.git
+cd yoloo-merch
+composer install
+copy .env.example .env
+php artisan key:generate
+"C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysql.exe" -u root < database\dumps\yoloo_merch.sql
+npm install && npm run build
+php artisan serve
+```
+
+Kalau versi MySQL di komputermu berbeda, cek nama foldernya di `C:\laragon\bin\mysql\` lalu sesuaikan path di atas. Alternatif tanpa `mysql` sama sekali: buka **HeidiSQL** (tombol *Database* di Laragon), klik kanan koneksinya, pilih **Run SQL file**, lalu pilih `database\dumps\yoloo_merch.sql`.
+
+#### Kalau tidak memakai dump
+
+Ganti baris `mysql ...` dengan migrasi biasa — hasilnya sama (tabel + role + akun Owner dan Admin):
+
+```bash
+php artisan migrate --seed
+```
+
+#### Selesai
+
+Buka `http://localhost:8000`, panel admin di `http://localhost:8000/admin/login`. Login dengan salah satu akun pada tabel di atas.
+
+Catatan: proyek memakai MySQL dengan nama database `yoloo_merch` dan user `root` tanpa password (standar Laragon). Sesuaikan `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` di `.env` bila konfigurasi MySQL di komputermu berbeda.
 
 ## About Laravel
 
