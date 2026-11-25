@@ -31,6 +31,8 @@ php artisan migrate --seed
 
 ### Menyiapkan proyek di Windows
 
+> **Penting — pakai branch `develop`.** Semua kode terbaru (termasuk `database/dumps/yoloo_merch.sql` dan akun contoh) ada di branch `develop`. Branch `main` di GitHub masih tertinggal, jadi `git clone` biasa akan mengambil `main` dan folder `database/` hanya berisi `factories`, `migrations`, `seeders` tanpa `dumps`. Selalu clone dengan `-b develop` (perintah di bawah sudah begitu), atau bila sudah terlanjur clone: `git fetch origin && git checkout develop`.
+
 Prasyarat: Laragon sudah terpasang (PHP, MySQL, Composer), Node.js LTS, dan Git. Jalankan **Laragon → Start All** sebelum mulai.
 
 #### Pilihan 1 — Git Bash / Laragon Terminal (disarankan)
@@ -38,7 +40,7 @@ Prasyarat: Laragon sudah terpasang (PHP, MySQL, Composer), Node.js LTS, dan Git.
 Buka **Laragon → Terminal** (sudah Git Bash, `cp` dan `mysql` dikenali):
 
 ```bash
-git clone https://github.com/zsaayyew/yoloo-merch.git
+git clone -b develop https://github.com/zsaayyew/yoloo-merch.git
 cd yoloo-merch
 composer install
 cp .env.example .env
@@ -53,7 +55,7 @@ php artisan serve
 Di CMD, `cp` dan `mysql` tidak dikenali, jadi pakai perintah Windows berikut:
 
 ```bat
-git clone https://github.com/zsaayyew/yoloo-merch.git
+git clone -b develop https://github.com/zsaayyew/yoloo-merch.git
 cd yoloo-merch
 composer install
 copy .env.example .env
