@@ -5,6 +5,8 @@
               di atas konten, jadi menu dirender sebagai bar navigasi horizontal di dalam slot
               sidebar. Menu FIN (Order, Pelanggan, Pengeluaran, Invoice, Laporan, Pengaturan QRIS)
               ditambahkan bersama PRD-05; User Management hanya tampil untuk Owner.
+              Warna mengikuti palet website publik (lihat resources/views/public): teal #14747b,
+              #124f53, #58C0C8 dan ink #181818.
 --}}
 @php
     $menuGroups = [
@@ -34,11 +36,11 @@
         $menuGroups['Lainnya'][] = ['label' => 'Pengguna', 'route' => 'admin.users.index', 'active' => 'admin.users.*'];
     }
 @endphp
-<nav class="border-b border-gray-200 bg-white px-6 py-2" aria-label="Navigasi dashboard">
-    <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+<nav class="bg-[#124f53] px-4 py-3 sm:px-6" aria-label="Navigasi dashboard">
+    <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3">
         @foreach ($menuGroups as $groupLabel => $links)
             <div class="flex flex-wrap items-center gap-1">
-                <span class="mr-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400">{{ $groupLabel }}</span>
+                <span class="mr-1 text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">{{ $groupLabel }}</span>
 
                 @foreach ($links as $link)
                     @php($isActive = request()->routeIs($link['active']))
@@ -46,9 +48,9 @@
                     <a href="{{ route($link['route']) }}"
                        @if ($isActive) aria-current="page" @endif
                        @class([
-                           'rounded-md px-2.5 py-1.5 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900',
-                           'bg-gray-900 font-medium text-white' => $isActive,
-                           'text-gray-600 hover:bg-gray-100 hover:text-gray-900' => ! $isActive,
+                           'rounded-full px-3 py-1.5 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#58C0C8]',
+                           'bg-[#58C0C8] font-bold text-[#181818]' => $isActive,
+                           'font-medium text-white/85 hover:bg-white/10 hover:text-white' => ! $isActive,
                        ])>
                         {{ $link['label'] }}
                     </a>
