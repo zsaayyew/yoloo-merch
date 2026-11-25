@@ -97,6 +97,7 @@ class CustomRequestSubmissionService
             'status' => RequestStatus::New,
             'product_id' => $product?->id,
             'product_name_snapshot' => $product?->name,
+            'options_snapshot' => $product ? ($data['options_snapshot'] ?? null) : null,
             'description' => $data['description'],
             'quantity' => (int) $data['quantity'],
             'specification' => $data['specification'] ?? null,

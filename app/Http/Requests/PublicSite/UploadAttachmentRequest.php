@@ -28,6 +28,7 @@ class UploadAttachmentRequest extends FormRequest
                 'extensions:jpg,jpeg,png,pdf',
             ],
             'caption' => ['nullable', 'string', 'max:200'],
+            'cart_item_id' => ['nullable', 'integer'], // diisi untuk lampiran desain per item checkout
         ];
     }
 

@@ -13,5 +13,6 @@
         'quantity' => $row['item']->quantity,
         'unit_price' => $row['unit_price'],
         'subtotal' => $row['subtotal'],
+        'files' => isset($itemAttachments) ? $itemAttachments->get($row['item']->id, collect())->pluck('original_name')->all() : [],
     ])"
     class="lg:sticky lg:top-6" />

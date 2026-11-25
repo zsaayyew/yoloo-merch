@@ -3,6 +3,7 @@
     Domain  : PRD-03 ORD (Raisyah)
     Catatan : Hanya bisa dibuka oleh sesi pengirim. Tidak ada QRIS, instruksi pembayaran,
               atau tautan cek status (ORD-BR-013).
+              Tombol WhatsApp (ORD-FR-016) tampil hanya jika nomor WhatsApp usaha sudah diatur ADM.
     Status  : diimplementasikan.
 --}}
 @extends('layouts.public')
@@ -26,6 +27,14 @@
                 <li>Admin menghubungimu lewat WhatsApp untuk konfirmasi detail dan penawaran harga.</li>
                 <li>Setelah kamu menyetujui penawaran, admin akan memproses pesananmu.</li>
             </ol>
+
+            @if ($whatsappUrl)
+                <a href="{{ $whatsappUrl }}" target="_blank" rel="noopener"
+                    class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-5 py-3 text-sm font-semibold text-white hover:bg-green-700">
+                    Hubungi Admin via WhatsApp
+                </a>
+                <p class="mt-2 text-xs text-gray-500">Pesan otomatis berisi kode {{ $orderRequest->code }} dan namamu.</p>
+            @endif
         </div>
 
         <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">

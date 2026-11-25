@@ -2,6 +2,7 @@
     Section : Formulir data pelanggan - PAGE-ORD-002
     Domain  : PRD-03 ORD (Raisyah)
     Catatan : Nama 2-100, WhatsApp 10-15 digit (dinormalisasi 62...), email opsional, catatan <= 500.
+              Berisi juga lampiran desain per item; tombol lanjut dikunci selama file masih diunggah.
     Status  : diimplementasikan.
 --}}
 @php
@@ -50,6 +51,10 @@
         @error('notes')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
+    </div>
+
+    <div class="border-t border-gray-100 pt-5">
+        @include('public.checkout.sections.item-attachments')
     </div>
 
     <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
