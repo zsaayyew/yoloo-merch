@@ -27,7 +27,7 @@ php artisan config:clear
 php artisan migrate --seed
 ```
 
-> Kredensial di atas khusus development. Ganti `OWNER_PASSWORD` sebelum aplikasi dipakai di server produksi.
+> Kredensial di atas khusus development. Ganti `OWNER_PASSWORD` dan `ADMIN_PASSWORD` sebelum aplikasi dipakai di server produksi.
 
 ### Menyiapkan proyek di Windows
 
