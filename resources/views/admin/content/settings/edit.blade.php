@@ -9,5 +9,9 @@
 @section('title', 'Profil Usaha, Kontak, dan Pickup')
 
 @section('content')
-    {{-- Isi halaman ditulis di sini saat fitur dikerjakan. --}}
+    @include('admin.partials.module-placeholder', [
+        'title' => 'Profil Usaha, Kontak, dan Pickup',
+        'requirement' => 'ADM-FR-003 (Content Management)',
+        'note' => 'WhatsApp, Instagram, email, alamat/jam, dan lokasi pickup.',
+    ])
 @endsection

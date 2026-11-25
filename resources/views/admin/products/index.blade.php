@@ -9,5 +9,9 @@
 @section('title', 'Daftar Produk')
 
 @section('content')
-    {{-- Isi halaman ditulis di sini saat fitur dikerjakan. --}}
+    @include('admin.partials.module-placeholder', [
+        'title' => 'Daftar Produk',
+        'requirement' => 'ADM-FR-004 s.d. ADM-FR-005 (Product & Variant Management)',
+        'note' => 'Daftar, tambah, ubah, dan arsip produk beserta opsinya.',
+    ])
 @endsection

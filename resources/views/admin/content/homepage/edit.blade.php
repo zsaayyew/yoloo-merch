@@ -8,5 +8,9 @@
 @section('title', 'Konten Beranda')
 
 @section('content')
-    {{-- Isi halaman ditulis di sini saat fitur dikerjakan. --}}
+    @include('admin.partials.module-placeholder', [
+        'title' => 'Konten Beranda',
+        'requirement' => 'ADM-FR-003 (Content Management)',
+        'note' => 'Teks, gambar, dan status publikasi beranda.',
+    ])
 @endsection
