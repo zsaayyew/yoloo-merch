@@ -7,6 +7,50 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## YOLOO Merch
+
+Aplikasi Laravel untuk website publik dan panel admin YOLOO Merch. Halaman admin berada di `/admin/login`.
+
+### Akun login admin (development)
+
+Kredensial ini dipakai tim untuk mencoba panel admin di komputer masing-masing:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Owner | `owner@yoloo.test` | `owner12345` |
+
+Akun dibuat oleh `database/seeders/OwnerUserSeeder.php` memakai nilai `OWNER_EMAIL` dan `OWNER_PASSWORD` dari `.env`. Kalau login ditolak, pastikan dua variabel itu terisi lalu jalankan:
+
+```bash
+php artisan config:clear
+php artisan migrate --seed
+```
+
+> Kredensial di atas khusus development. Ganti `OWNER_PASSWORD` sebelum aplikasi dipakai di server produksi.
+
+### Menyiapkan proyek
+
+```bash
+git clone https://github.com/zsaayyew/yoloo-merch.git
+cd yoloo-merch
+composer install
+cp .env.example .env
+php artisan key:generate
+
+# pilih salah satu: impor dump yang sudah berisi data seed
+mysql -u root < database/dumps/yoloo_merch.sql
+
+# atau bangun dari nol
+php artisan migrate --seed
+
+npm install && npm run build
+php artisan serve
+```
+
+Buka `http://localhost:8000`, panel admin di `http://localhost:8000/admin/login`.
+
+Catatan: proyek memakai MySQL dengan nama database `yoloo_merch`. Sesuaikan `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` di `.env` bila konfigurasi MySQL di komputermu berbeda.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
