@@ -4,7 +4,7 @@
     Catatan : Satu view untuk dua route: admin.orders.show ($order terisi) dan
               admin.requests.show ($orderRequest terisi). payments + refunds = PAGE-FIN-005.
               Modal aksi ada di admin/orders/modals.
-    Status  : bagian info pelanggan, item, lampiran, status, penawaran, dan total sudah diimplementasikan;
+    Status  : bagian info pelanggan, item, lampiran, status (+ubah status request), penawaran, konversi, dan total sudah diimplementasikan;
               bagian riwayat status, pembayaran, refund, invoice, catatan internal masih placeholder.
 --}}
 @extends('layouts.admin')
@@ -30,6 +30,13 @@
         </div>
     </div>
 
+    @if (session('success'))
+        <p class="mb-4 rounded-lg bg-green-50 px-4 py-2 text-sm text-green-800" role="status">{{ session('success') }}</p>
+    @endif
+    @if (session('error'))
+        <p class="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-800" role="alert">{{ session('error') }}</p>
+    @endif
+
     <div class="space-y-4">
         @include('admin.orders.sections.customer-info')
         @include('admin.orders.sections.items')
@@ -38,6 +45,7 @@
         @if ($orderRequest)
             @include('admin.orders.sections.request-status')
             @include('admin.orders.sections.quotation')
+            @include('admin.orders.modals.convert-request')
         @endif
 
         @if ($order)
