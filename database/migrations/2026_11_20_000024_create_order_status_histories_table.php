@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Schema;
 /*
  * Tabel   : order_status_histories
  * Domain  : PRD-05 FIN - Sales, Transaction & Finance (Zhaqtiawan)
- * Catatan : kerangka. Kolom final ditulis pemilik domain saat fitur dikerjakan,
- *           mengacu ke Master PRD (bagian J Data requirements) dan ERD bersama.
+ * Catatan : histori perubahan status pengerjaan order (FIN-FR-010, FIN-BR-007).
+ *           Append-only: tidak ada updated_at, baris tidak diubah atau dihapus.
+ *           Histori status request dicatat di audit_logs (keputusan K-7).
+ *           Kolom mengikuti Master PRD bagian J (Order Status History).
  */
 return new class extends Migration
 {
@@ -16,8 +18,15 @@ return new class extends Migration
     {
         Schema::create('order_status_histories', function (Blueprint $table) {
             $table->id();
-            // TODO: kolom sesuai Master PRD dan ERD final.
-            $table->timestamps();
+            $table->foreignId('order_id')->constrained('orders')->restrictOnDelete();
+            $table->string('previous_status')->nullable();          // OrderStatus (kosong untuk catatan awal)
+            $table->string('new_status');                           // OrderStatus
+            $table->foreignId('changed_by_user_id')->nullable()     // kosong jika diubah oleh sistem
+                ->constrained('users')->nullOnDelete();
+            $table->timestamp('changed_at');
+            $table->text('note')->nullable();                       // catatan / alasan (wajib saat dibatalkan)
+
+            $table->index(['order_id', 'changed_at']);
         });
     }
 
