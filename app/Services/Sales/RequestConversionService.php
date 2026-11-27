@@ -118,7 +118,11 @@ class RequestConversionService
                     'ordered_at' => now(),
                 ]);
 
-                $quantity = max((int) $locked->quantity, 1);
+                // FIN-BR-003: kuantitas x harga satuan harus sama dengan subtotal. Jika nominal penawaran tidak
+                // habis dibagi kuantitas, simpan sebagai satu item dan catat jumlah request di deskripsi.
+                $requestedQuantity = max((int) $locked->quantity, 1);
+                $quantity = $total % $requestedQuantity === 0 ? $requestedQuantity : 1;
+                $quantityNote = $quantity === $requestedQuantity ? '' : "\n\nJumlah pada request: ".$requestedQuantity;
 
                 OrderItem::create([
                     'order_id' => $order->getKey(),
@@ -126,11 +130,11 @@ class RequestConversionService
                     'product_name_snapshot' => $locked->product_name_snapshot ?: 'Custom order',
                     'options_snapshot' => $locked->options_snapshot ?? [],
                     'quantity' => $quantity,
-                    'price_model' => 'custom',
-                    'unit_price' => (int) round($total / $quantity),
+                    'price_model' => 'quotation',
+                    'unit_price' => intdiv($total, $quantity),
                     'subtotal' => $total,
                     'price_status' => OrderItem::PRICE_FINAL,
-                    'description' => trim($locked->description."\n\n".($locked->specification ?? '')),
+                    'description' => trim($locked->description."\n\n".($locked->specification ?? '').$quantityNote),
                 ]);
 
                 // Catatan awal histori order (previous_status kosong).
