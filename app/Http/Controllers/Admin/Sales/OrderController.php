@@ -11,6 +11,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderAttachment;
 use App\Models\OrderRequest;
+use App\Services\Sales\QuotationService;
+use App\Services\Sales\RequestConversionService;
+use App\Services\Sales\StatusTransitionService;
 use App\Support\PhoneNumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -117,7 +120,11 @@ class OrderController extends Controller
         ]);
     }
 
-    public function showRequest(OrderRequest $orderRequest): View
+    public function showRequest(
+        OrderRequest $orderRequest,
+        StatusTransitionService $transitions,
+        RequestConversionService $conversion,
+    ): View
     {
         // Request tidak punya policy sendiri; hak lihat sama dengan order.
         Gate::authorize('viewAny', Order::class);
@@ -134,6 +141,14 @@ class OrderController extends Controller
             'orderRequest' => $orderRequest,
             'customer' => $orderRequest->customer,
             'attachments' => $attachments,
+            // Pilihan status manual diambil dari aturan tim; "Penawaran Dikirim" lewat form penawaran.
+            'manualTargets' => collect($transitions->allowedRequestTransitions($orderRequest->status))
+                ->reject(fn ($status) => $status === \App\Enums\RequestStatus::QuotationSent)
+                ->mapWithKeys(fn ($status) => [$status->value => $status->label()])
+                ->all(),
+            'canQuote' => QuotationService::canQuote($orderRequest),
+            'canConvert' => $conversion->canConvert($orderRequest),
+            'convertBlocker' => $conversion->blocker($orderRequest),
         ]);
     }
 

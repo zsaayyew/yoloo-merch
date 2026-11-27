@@ -14,6 +14,9 @@ use App\Http\Controllers\Admin\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Sales\CustomerController;
 use App\Http\Controllers\Admin\Sales\OrderController;
+use App\Http\Controllers\Admin\Sales\QuotationController;
+use App\Http\Controllers\Admin\Sales\RequestConversionController;
+use App\Http\Controllers\Admin\Sales\RequestStatusController;
 use Illuminate\Support\Facades\Route;
 
 // PRD-04 ADM - login/logout (ADM-FR-001)
@@ -34,6 +37,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('requests/{orderRequest}', [OrderController::class, 'showRequest'])
             ->whereNumber('orderRequest')->name('requests.show');
 
+        // PRD-05 FIN - review request, penawaran, konversi sekali (FIN-FR-003, 004, 005)
+        Route::patch('requests/{orderRequest}/status', [RequestStatusController::class, 'update'])
+            ->whereNumber('orderRequest')->name('requests.status.update');
+        Route::put('requests/{orderRequest}/quotation', [QuotationController::class, 'update'])
+            ->whereNumber('orderRequest')->name('requests.quotation.update');
+        Route::post('requests/{orderRequest}/convert', [RequestConversionController::class, 'store'])
+            ->whereNumber('orderRequest')->name('requests.convert');
+
         // PRD-05 FIN - pelanggan (FIN-FR-011)
         Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
         Route::get('customers/create', [CustomerController::class, 'create'])->name('customers.create');
@@ -49,4 +60,4 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 // PRD-04 ADM - dashboard, konten, katalog, harga, media, user (Owner)
 
-// PRD-05 FIN - (sisa) status, konversi, pembayaran, refund, invoice, pengeluaran, laporan, QRIS
+// PRD-05 FIN - (sisa) status order, pembatalan, pembayaran, refund, invoice, pengeluaran, laporan, QRIS
