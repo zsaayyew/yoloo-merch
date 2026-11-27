@@ -9,5 +9,9 @@
 @section('title', 'Manajemen Akun Admin')
 
 @section('content')
-    {{-- Isi halaman ditulis di sini saat fitur dikerjakan. --}}
+    @include('admin.partials.module-placeholder', [
+        'title' => 'Manajemen Akun Admin',
+        'requirement' => 'ADM-FR-009 (User & Role Management)',
+        'note' => 'Hanya Owner yang dapat membuka halaman ini; Admin menerima 403.',
+    ])
 @endsection

@@ -8,5 +8,9 @@
 @section('title', 'Daftar Kolaborasi')
 
 @section('content')
-    {{-- Isi halaman ditulis di sini saat fitur dikerjakan. --}}
+    @include('admin.partials.module-placeholder', [
+        'title' => 'Daftar Kolaborasi',
+        'requirement' => 'ADM-FR-007 (Testimonial & Portfolio Management)',
+        'note' => 'Dokumentasi proyek dan kerja sama yang tampil sebagai portofolio.',
+    ])
 @endsection

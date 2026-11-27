@@ -9,5 +9,9 @@
 @section('title', 'Media')
 
 @section('content')
-    {{-- Isi halaman ditulis di sini saat fitur dikerjakan. --}}
+    @include('admin.partials.module-placeholder', [
+        'title' => 'Media',
+        'requirement' => 'ADM-FR-008 (Media & Publication Management)',
+        'note' => 'Unggah dan kelola berkas media yang dipakai konten website.',
+    ])
 @endsection

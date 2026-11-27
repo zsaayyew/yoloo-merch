@@ -8,5 +8,9 @@
 @section('title', 'Kategori Galeri')
 
 @section('content')
-    {{-- Isi halaman ditulis di sini saat fitur dikerjakan. --}}
+    @include('admin.partials.module-placeholder', [
+        'title' => 'Kategori Galeri',
+        'requirement' => 'ADM-FR-007 (Testimonial & Portfolio Management)',
+        'note' => 'Pengelompokan foto galeri di website.',
+    ])
 @endsection
