@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Sales;
 use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ChangeRequestStatusRequest;
+use App\Models\Order;
 use App\Models\OrderRequest;
 use App\Services\Finance\FinanceRuleException;
 use App\Services\Sales\StatusTransitionService;
@@ -19,7 +20,7 @@ class RequestStatusController extends Controller
         OrderRequest $orderRequest,
         StatusTransitionService $transitions,
     ): RedirectResponse {
-        Gate::authorize('update', $orderRequest);
+        Gate::authorize('manageRequests', Order::class);
 
         $target = RequestStatus::from($request->validated('status'));
 

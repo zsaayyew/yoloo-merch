@@ -7,8 +7,8 @@ use App\Models\User;
 
 /**
  * PRD-05 FIN - Order & request.
- * Owner dan Admin (sudah lolos middleware auth + active) boleh melihat daftar dan detail.
- * Aksi ubah/hapus dibuka bertahap saat fitur FIN berikutnya dikerjakan.
+ * Owner dan Admin (sudah lolos middleware auth + active) boleh melihat dan mengelola transaksi.
+ * Pembatalan transaksi hanya Owner (FIN-FR-016). Tidak ada hapus permanen (FIN-BR-009).
  */
 class OrderPolicy
 {
@@ -24,12 +24,28 @@ class OrderPolicy
 
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
+    /** Ubah status pengerjaan (kecuali pembatalan). */
     public function update(User $user, Order $order): bool
     {
-        return false;
+        return true;
+    }
+
+    /** Pembatalan transaksi: Owner saja. */
+    public function cancel(User $user, Order $order): bool
+    {
+        return $user->isOwner();
+    }
+
+    /**
+     * Review, penawaran, dan konversi custom request. Request tidak punya model policy sendiri,
+     * jadi dicek lewat kemampuan tanpa model: Gate::authorize('manageRequests', Order::class).
+     */
+    public function manageRequests(User $user): bool
+    {
+        return true;
     }
 
     public function delete(User $user, Order $order): bool

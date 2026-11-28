@@ -25,8 +25,13 @@ use App\Http\Controllers\Admin\Content\MediaController;
 use App\Http\Controllers\Admin\Content\SiteSettingController;
 use App\Http\Controllers\Admin\Content\TestimonialController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\Finance\PaymentController;
+use App\Http\Controllers\Admin\Finance\PaymentVoidController;
+use App\Http\Controllers\Admin\Finance\RefundController;
 use App\Http\Controllers\Admin\Sales\CustomerController;
+use App\Http\Controllers\Admin\Sales\OrderCancellationController;
 use App\Http\Controllers\Admin\Sales\OrderController;
+use App\Http\Controllers\Admin\Sales\OrderStatusController;
 use App\Http\Controllers\Admin\Sales\QuotationController;
 use App\Http\Controllers\Admin\Sales\RequestConversionController;
 use App\Http\Controllers\Admin\Sales\RequestStatusController;
@@ -131,6 +136,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('requests/{orderRequest}/convert', [RequestConversionController::class, 'store'])
             ->whereNumber('orderRequest')->name('requests.convert');
 
+        // PRD-05 FIN - status pengerjaan dan pembatalan order (FIN-FR-010, FIN-FR-016; batal: Owner via policy)
+        Route::patch('orders/{order}/status', [OrderStatusController::class, 'update'])
+            ->whereNumber('order')->name('orders.status.update');
+        Route::post('orders/{order}/cancel', [OrderCancellationController::class, 'store'])
+            ->whereNumber('order')->name('orders.cancel');
+
+        // PRD-05 FIN - pembayaran, void, refund (FIN-FR-008, 009, 019; void dan refund: Owner via policy)
+        Route::post('orders/{order}/payments', [PaymentController::class, 'store'])
+            ->whereNumber('order')->name('orders.payments.store');
+        Route::post('payments/{payment}/void', [PaymentVoidController::class, 'store'])
+            ->whereNumber('payment')->name('payments.void');
+        Route::post('payments/{payment}/refunds', [RefundController::class, 'store'])
+            ->whereNumber('payment')->name('payments.refunds.store');
+
         // PRD-05 FIN - pelanggan (FIN-FR-011)
         Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
         Route::get('customers/create', [CustomerController::class, 'create'])->name('customers.create');
@@ -144,4 +163,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
+// PRD-04 ADM - dashboard, konten, katalog, harga, media, user (Owner)
+
+// PRD-05 FIN - (sisa) transaksi manual, invoice, pengeluaran, laporan, QRIS
 // PRD-05 FIN - (sisa) status order, pembatalan, pembayaran, refund, invoice, pengeluaran, laporan, QRIS
