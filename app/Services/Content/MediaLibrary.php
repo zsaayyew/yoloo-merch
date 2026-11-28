@@ -36,6 +36,37 @@ class MediaLibrary
     }
 
     /**
+     * Determine whether the given stored path still exists on the public disk.
+     */
+    public function hasStoredFile(string $path): bool
+    {
+        return $path !== '' && Storage::disk('public')->exists($path);
+    }
+
+    /**
+     * Register a file that was stored before the media library existed.
+     */
+    public function registerStoredFile(string $path, ?string $altText = null, ?int $uploadedBy = null): ?Media
+    {
+        if (! $this->hasStoredFile($path)) {
+            return null;
+        }
+
+        $disk = Storage::disk('public');
+
+        return Media::query()->firstOrCreate(
+            ['path' => $path],
+            [
+                'original_name' => basename($path),
+                'mime_type' => $disk->mimeType($path) ?: 'application/octet-stream',
+                'size' => (int) ($disk->size($path) ?: 0),
+                'alt_text' => $altText,
+                'uploaded_by' => $uploadedBy,
+            ],
+        );
+    }
+
+    /**
      * Record that the given record uses the media file in the given field.
      */
     public function attach(Model $owner, string $field, Media $media): MediaUsage
