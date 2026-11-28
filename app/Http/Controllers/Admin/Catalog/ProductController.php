@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Media;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Services\Catalog\CatalogData;
+use App\Services\Content\MediaLibrary;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -16,6 +18,8 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
+    public function __construct(private readonly MediaLibrary $mediaLibrary) {}
+
     /**
      * Display a listing of the products (ADM-FR-004).
      */
@@ -155,6 +159,11 @@ class ProductController extends Controller
 
         $wasPrimary = $image->is_primary;
 
+        $this->mediaLibrary->detach($image, 'image');
+
+        $media = Media::query()->where('path', $image->path)->first();
+        $media?->delete();
+
         Storage::disk('public')->delete($image->path);
         $image->delete();
 
@@ -186,12 +195,16 @@ class ProductController extends Controller
                 continue;
             }
 
-            $product->images()->create([
-                'path' => $file->store('products', 'public'),
+            $media = $this->mediaLibrary->record($file, $request->user(), 'products', $product->name);
+
+            $image = $product->images()->create([
+                'path' => $media->path,
                 'alt_text' => $product->name,
                 'is_primary' => ! $hasPrimary,
                 'sort_order' => ++$lastSort,
             ]);
+
+            $this->mediaLibrary->attach($image, 'image', $media);
 
             $hasPrimary = true;
         }

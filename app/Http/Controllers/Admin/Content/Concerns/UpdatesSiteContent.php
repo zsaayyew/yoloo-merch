@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Content\Concerns;
 
 use App\Models\SiteContent;
+use App\Services\Content\MediaLibrary;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 
@@ -23,6 +24,7 @@ trait UpdatesSiteContent
         ]);
 
         $sections = SiteContent::SECTIONS[$page] ?? [];
+        $mediaLibrary = app(MediaLibrary::class);
 
         foreach (array_keys($sections) as $order => $section) {
             $input = (array) $request->input("sections.{$section}", []);
@@ -42,11 +44,21 @@ trait UpdatesSiteContent
 
             $image = $request->file("sections.{$section}.image");
 
+            $media = null;
+
             if ($image instanceof UploadedFile) {
-                $content->image_path = $image->store('content/'.$page, 'public');
+                $altText = trim((string) ($input['title'] ?? '')) ?: $content->label();
+
+                $media = $mediaLibrary->record($image, $request->user(), 'content/'.$page, $altText);
+                $content->image_path = $media->path;
             }
 
             $content->save();
+
+            if ($media !== null) {
+                $mediaLibrary->detach($content, 'image');
+                $mediaLibrary->attach($content, 'image', $media);
+            }
         }
     }
 }

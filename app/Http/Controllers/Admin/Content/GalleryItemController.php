@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin\Content;
 use App\Http\Controllers\Controller;
 use App\Models\GalleryCategory;
 use App\Models\GalleryItem;
+use App\Models\Media;
+use App\Services\Content\MediaLibrary;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -13,6 +15,8 @@ use Illuminate\View\View;
 
 class GalleryItemController extends Controller
 {
+    public function __construct(private readonly MediaLibrary $mediaLibrary) {}
+
     /**
      * Display a listing of the gallery items (ADM-FR-007).
      */
@@ -39,7 +43,9 @@ class GalleryItemController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        GalleryItem::query()->create($this->validated($request));
+        $item = GalleryItem::query()->create($this->validated($request));
+
+        $this->storeImage($item, $request);
 
         return redirect()
             ->route('admin.content.gallery.index')
@@ -62,7 +68,9 @@ class GalleryItemController extends Controller
      */
     public function update(Request $request, GalleryItem $gallery): RedirectResponse
     {
-        $gallery->update($this->validated($request, $gallery));
+        $gallery->update($this->validated($request));
+
+        $this->storeImage($gallery, $request);
 
         return redirect()
             ->route('admin.content.gallery.index')
@@ -89,6 +97,11 @@ class GalleryItemController extends Controller
     public function destroy(GalleryItem $gallery): RedirectResponse
     {
         if ($gallery->image_path) {
+            $this->mediaLibrary->detach($gallery, 'image');
+
+            $media = Media::query()->where('path', $gallery->image_path)->first();
+            $media?->delete();
+
             Storage::disk('public')->delete($gallery->image_path);
         }
 
@@ -104,7 +117,7 @@ class GalleryItemController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function validated(Request $request, ?GalleryItem $item = null): array
+    private function validated(Request $request): array
     {
         $data = $request->validate([
             'gallery_category_id' => ['nullable', 'integer', 'exists:gallery_categories,id'],
@@ -118,16 +131,25 @@ class GalleryItemController extends Controller
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
         unset($data['image']);
 
+        return $data;
+    }
+
+    /**
+     * Store a newly uploaded photo in the media library and use it for the item.
+     */
+    private function storeImage(GalleryItem $item, Request $request): void
+    {
         $image = $request->file('image');
 
-        if ($image instanceof UploadedFile) {
-            if ($item?->image_path) {
-                Storage::disk('public')->delete($item->image_path);
-            }
-
-            $data['image_path'] = $image->store('gallery', 'public');
+        if (! $image instanceof UploadedFile) {
+            return;
         }
 
-        return $data;
+        $media = $this->mediaLibrary->record($image, $request->user(), 'gallery', $item->title);
+
+        $this->mediaLibrary->detach($item, 'image');
+        $this->mediaLibrary->attach($item, 'image', $media);
+
+        $item->update(['image_path' => $media->path]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['path', 'original_name', 'mime_type', 'size', 'alt_text', 'uploaded_by'])]
@@ -39,6 +40,24 @@ class Media extends Model
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    /**
+     * Get the records that use this file (produk, konten, galeri).
+     *
+     * @return HasMany<MediaUsage, $this>
+     */
+    public function usages(): HasMany
+    {
+        return $this->hasMany(MediaUsage::class);
+    }
+
+    /**
+     * Determine whether the file is used somewhere on the website.
+     */
+    public function isUsed(): bool
+    {
+        return $this->usages()->exists();
     }
 
     /**

@@ -113,6 +113,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('media', [MediaController::class, 'index'])->name('media.index');
         Route::post('media', [MediaController::class, 'store'])->name('media.store');
         Route::patch('media/{media}', [MediaController::class, 'update'])->name('media.update');
+        Route::put('media/{media}/file', [MediaController::class, 'replaceFile'])->name('media.replace');
         Route::delete('media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
 
         // PRD-04 ADM - user management, hanya Owner (ADM-FR-009)

@@ -63,6 +63,19 @@
                             </p>
                             <p class="text-xs text-[#181818]/50">{{ $item->sizeForHumans() }} &middot; {{ $item->created_at?->translatedFormat('j M Y') }}</p>
 
+                            <div class="text-xs text-[#181818]/70">
+                                @if ($item->usages_count > 0)
+                                    <p class="font-bold text-[#124f53]">Dipakai di {{ $item->usages_count }} tempat</p>
+                                    <ul class="mt-1 space-y-0.5">
+                                        @foreach ($item->usages as $usage)
+                                            <li class="truncate" title="{{ $usage->label() }}">{{ $usage->label() }}</li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p class="text-[#181818]/50">Belum dipakai di halaman mana pun.</p>
+                                @endif
+                            </div>
+
                             <form method="POST" action="{{ route('admin.media.update', $item) }}" class="flex items-end gap-2">
                                 @csrf
                                 @method('PATCH')
@@ -73,6 +86,24 @@
                                 </div>
                                 <button type="submit" class="text-xs font-bold text-[#124f53] hover:underline">Simpan</button>
                             </form>
+
+                            <details class="text-xs">
+                                <summary class="cursor-pointer font-bold text-[#124f53] hover:underline">Ganti berkas</summary>
+
+                                <form method="POST" action="{{ route('admin.media.replace', $item) }}"
+                                      enctype="multipart/form-data" class="mt-2 flex items-end gap-2">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="file" name="file" required
+                                           accept="image/jpeg,image/png,image/webp,application/pdf"
+                                           class="w-full rounded-lg border border-[#181818]/20 px-2 py-1 text-xs file:mr-2 file:rounded-full file:border-0 file:bg-[#124f53] file:px-2 file:py-1 file:text-xs file:font-bold file:text-white">
+                                    <button type="submit" class="whitespace-nowrap text-xs font-bold text-[#124f53] hover:underline">Simpan</button>
+                                </form>
+
+                                @error('file')
+                                    <p class="mt-1 text-xs font-semibold text-[#b3261e]">{{ $message }}</p>
+                                @enderror
+                            </details>
 
                             <div class="mt-auto flex items-center justify-between gap-2 pt-2">
                                 <a href="{{ $item->url() }}" target="_blank" rel="noopener"

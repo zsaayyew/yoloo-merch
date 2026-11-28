@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Content;
 
 use App\Http\Controllers\Controller;
 use App\Models\Media;
+use App\Services\Content\MediaLibrary;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -11,13 +12,19 @@ use Illuminate\View\View;
 
 class MediaController extends Controller
 {
+    public function __construct(private readonly MediaLibrary $mediaLibrary) {}
+
     /**
      * Display a listing of the media library (PAGE-ADM-005, ADM-FR-008).
      */
     public function index(): View
     {
         return view('admin.media.index', [
-            'media' => Media::query()->latest('id')->paginate(24),
+            'media' => Media::query()
+                ->with(['usages.usable'])
+                ->withCount('usages')
+                ->latest('id')
+                ->paginate(24),
         ]);
     }
 
@@ -34,13 +41,7 @@ class MediaController extends Controller
         $stored = 0;
 
         foreach ($request->file('files', []) as $file) {
-            $media = Media::query()->create([
-                'path' => $file->store('media', 'public'),
-                'original_name' => $file->getClientOriginalName(),
-                'mime_type' => $file->getClientMimeType(),
-                'size' => $file->getSize(),
-                'uploaded_by' => $request->user()?->id,
-            ]);
+            $media = $this->mediaLibrary->record($file, $request->user());
 
             if ($media->exists) {
                 $stored++;
@@ -66,6 +67,22 @@ class MediaController extends Controller
         return redirect()
             ->route('admin.media.index')
             ->with('status', 'Keterangan media berhasil diperbarui.');
+    }
+
+    /**
+     * Replace the stored file of the given media without losing its usages.
+     */
+    public function replaceFile(Request $request, Media $media): RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:'.Media::MAX_SIZE_KB],
+        ]);
+
+        $this->mediaLibrary->replace($media, $request->file('file'));
+
+        return redirect()
+            ->route('admin.media.index')
+            ->with('status', 'Berkas media berhasil diganti. Pemakaian di halaman tetap tersimpan.');
     }
 
     /**
