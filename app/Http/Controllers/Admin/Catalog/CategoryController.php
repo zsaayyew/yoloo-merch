@@ -72,7 +72,7 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category): RedirectResponse
     {
-        $data = $this->validated($request);
+        $data = $this->validated($request, $category);
         $data['slug'] = Category::uniqueSlug($data['name'], $category->id);
 
         $category->update($data);
@@ -105,10 +105,24 @@ class CategoryController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function validated(Request $request): array
+    private function validated(Request $request, ?Category $category = null): array
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
+            'name' => [
+                'required',
+                'string',
+                'max:120',
+                function (string $attribute, mixed $value, \Closure $fail) use ($category): void {
+                    $duplicate = Category::query()
+                        ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim((string) $value))])
+                        ->when($category !== null, fn ($query) => $query->whereKeyNot($category->getKey()))
+                        ->exists();
+
+                    if ($duplicate) {
+                        $fail('Nama kategori produk ini sudah dipakai. Gunakan nama lain.');
+                    }
+                },
+            ],
             'description' => ['nullable', 'string', 'max:1000'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
         ]);

@@ -232,6 +232,121 @@ class CatalogManagementTest extends TestCase
         $this->get('/produk')->assertOk()->assertDontSee('Kaos Custom');
     }
 
+    public function test_option_group_and_value_can_be_edited(): void
+    {
+        $user = $this->makeUser(Role::ADMIN);
+        $product = $this->makeProduct();
+
+        $group = $product->optionGroups()->create([
+            'name' => 'Bahan',
+            'is_required' => false,
+            'sort_order' => 0,
+        ]);
+        $value = $group->values()->create([
+            'label' => 'Katun Combed 30s',
+            'is_active' => true,
+            'sort_order' => 0,
+        ]);
+
+        $otherGroup = $product->optionGroups()->create([
+            'name' => 'Finishing',
+            'is_required' => false,
+            'sort_order' => 1,
+        ]);
+        $otherValue = $otherGroup->values()->create([
+            'label' => 'Bordir',
+            'is_active' => true,
+            'sort_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('admin.products.options.update', [$product, $group]), [
+                'name' => 'Bahan Kain',
+                'sort_order' => 2,
+                'is_required' => '1',
+            ])
+            ->assertRedirect(route('admin.products.options.index', $product));
+
+        $group->refresh();
+        $this->assertSame('Bahan Kain', $group->name);
+        $this->assertSame(2, $group->sort_order);
+        $this->assertTrue($group->is_required);
+
+        $this->actingAs($user)
+            ->put(route('admin.products.options.values.update', [$product, $group, $value]), [
+                'label' => 'Katun Combed 24s',
+                'sort_order' => 3,
+                'forbidden_combinations' => [$otherValue->id, $value->id],
+            ])
+            ->assertRedirect(route('admin.products.options.index', $product));
+
+        $value->refresh();
+        $this->assertSame('Katun Combed 24s', $value->label);
+        $this->assertSame(3, $value->sort_order);
+        $this->assertFalse($value->is_active);
+        $this->assertSame([$otherValue->id], $value->forbidden_combinations);
+    }
+
+    public function test_option_value_rejects_forbidden_combination_from_other_product(): void
+    {
+        $user = $this->makeUser(Role::ADMIN);
+        $product = $this->makeProduct();
+
+        $group = $product->optionGroups()->create(['name' => 'Bahan', 'sort_order' => 0]);
+        $value = $group->values()->create(['label' => 'Katun', 'is_active' => true, 'sort_order' => 0]);
+
+        $foreignProduct = Product::query()->create([
+            'category_id' => $product->category_id,
+            'name' => 'Totebag',
+            'slug' => 'totebag',
+            'price_model' => 'quotation',
+            'status' => Product::STATUS_DRAFT,
+        ]);
+        $foreignValue = $foreignProduct->optionGroups()->create(['name' => 'Bahan', 'sort_order' => 0])
+            ->values()->create(['label' => 'Kanvas', 'sort_order' => 0]);
+
+        $this->actingAs($user)
+            ->put(route('admin.products.options.values.update', [$product, $group, $value]), [
+                'label' => 'Katun',
+                'forbidden_combinations' => [$foreignValue->id],
+            ])
+            ->assertSessionHasErrors('forbidden_combinations.0');
+
+        $this->assertNull($value->fresh()->forbidden_combinations);
+    }
+
+    public function test_duplicate_product_category_name_is_rejected(): void
+    {
+        $user = $this->makeUser(Role::ADMIN);
+        $category = Category::query()->create(['name' => 'Kaos', 'slug' => 'kaos', 'is_active' => true]);
+
+        $this->actingAs($user)
+            ->post(route('admin.categories.store'), [
+                'name' => ' kaos ',
+                'is_active' => '1',
+            ])
+            ->assertSessionHasErrors('name');
+
+        $this->assertDatabaseCount('categories', 1);
+
+        $other = Category::query()->create(['name' => 'Jaket', 'slug' => 'jaket', 'is_active' => true]);
+
+        $this->actingAs($user)
+            ->put(route('admin.categories.update', $other), ['name' => 'KAOS'])
+            ->assertSessionHasErrors('name');
+
+        $this->assertSame('Jaket', $other->fresh()->name);
+
+        $this->actingAs($user)
+            ->put(route('admin.categories.update', $category), [
+                'name' => 'Kaos',
+                'is_active' => '1',
+            ])
+            ->assertRedirect(route('admin.categories.index'));
+
+        $this->assertSame('kaos', $category->fresh()->slug);
+    }
+
     private function makeProduct(): Product
     {
         $category = Category::query()->create(['name' => 'Kaos', 'slug' => 'kaos', 'is_active' => true]);

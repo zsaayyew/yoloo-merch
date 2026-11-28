@@ -60,7 +60,7 @@ class GalleryCategoryController extends Controller
      */
     public function update(Request $request, GalleryCategory $galleryCategory): RedirectResponse
     {
-        $data = $this->validated($request);
+        $data = $this->validated($request, $galleryCategory);
         $data['slug'] = GalleryCategory::uniqueSlug($data['name'], $galleryCategory->id);
 
         $galleryCategory->update($data);
@@ -93,10 +93,24 @@ class GalleryCategoryController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function validated(Request $request): array
+    private function validated(Request $request, ?GalleryCategory $category = null): array
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
+            'name' => [
+                'required',
+                'string',
+                'max:120',
+                function (string $attribute, mixed $value, \Closure $fail) use ($category): void {
+                    $duplicate = GalleryCategory::query()
+                        ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim((string) $value))])
+                        ->when($category !== null, fn ($query) => $query->whereKeyNot($category->getKey()))
+                        ->exists();
+
+                    if ($duplicate) {
+                        $fail('Nama kategori galeri ini sudah dipakai. Gunakan nama lain.');
+                    }
+                },
+            ],
             'description' => ['nullable', 'string', 'max:500'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
         ]);

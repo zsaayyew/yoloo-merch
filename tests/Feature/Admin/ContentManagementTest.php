@@ -194,6 +194,34 @@ class ContentManagementTest extends TestCase
         $this->assertDatabaseHas('gallery_categories', ['id' => $category->id]);
     }
 
+    public function test_duplicate_gallery_category_name_is_rejected(): void
+    {
+        $user = $this->makeUser(Role::ADMIN);
+        $category = GalleryCategory::query()->create([
+            'name' => 'Merch Kampus',
+            'slug' => 'merch-kampus',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('admin.content.gallery-categories.store'), [
+                'name' => 'merch kampus',
+                'is_active' => '1',
+            ])
+            ->assertSessionHasErrors('name');
+
+        $this->assertDatabaseCount('gallery_categories', 1);
+
+        $this->actingAs($user)
+            ->put(route('admin.content.gallery-categories.update', $category), [
+                'name' => 'Merch Kampus',
+                'is_active' => '1',
+            ])
+            ->assertRedirect(route('admin.content.gallery-categories.index'));
+
+        $this->assertSame('merch-kampus', $category->fresh()->slug);
+    }
+
     private function makeUser(string $roleName): User
     {
         $role = Role::firstOrCreate(['name' => $roleName], ['label' => ucfirst($roleName)]);

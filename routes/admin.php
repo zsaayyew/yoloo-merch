@@ -84,10 +84,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('products.options.index');
         Route::post('products/{product}/options', [ProductOptionController::class, 'storeGroup'])
             ->name('products.options.store');
+        Route::put('products/{product}/options/{group}', [ProductOptionController::class, 'updateGroup'])
+            ->name('products.options.update');
         Route::delete('products/{product}/options/{group}', [ProductOptionController::class, 'destroyGroup'])
             ->name('products.options.destroy');
         Route::post('products/{product}/options/{group}/values', [ProductOptionController::class, 'storeValue'])
             ->name('products.options.values.store');
+        Route::put('products/{product}/options/{group}/values/{value}', [ProductOptionController::class, 'updateValue'])
+            ->name('products.options.values.update');
         Route::patch('products/{product}/options/{group}/values/{value}/toggle', [ProductOptionController::class, 'toggleValue'])
             ->name('products.options.values.toggle');
         Route::delete('products/{product}/options/{group}/values/{value}', [ProductOptionController::class, 'destroyValue'])
