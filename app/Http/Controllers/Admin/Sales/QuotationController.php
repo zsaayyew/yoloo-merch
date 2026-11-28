@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Sales;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\QuotationRequest;
+use App\Models\Order;
 use App\Models\OrderRequest;
 use App\Services\Finance\FinanceRuleException;
 use App\Services\Sales\QuotationService;
@@ -18,7 +19,7 @@ class QuotationController extends Controller
         OrderRequest $orderRequest,
         QuotationService $quotations,
     ): RedirectResponse {
-        Gate::authorize('update', $orderRequest);
+        Gate::authorize('manageRequests', Order::class);
 
         try {
             $quotations->save(

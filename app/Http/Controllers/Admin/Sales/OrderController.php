@@ -11,6 +11,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderAttachment;
 use App\Models\OrderRequest;
+use App\Models\OrderStatusHistory;
+use App\Models\Payment;
+use App\Models\Refund;
+use App\Services\Finance\FinanceRuleException;
+use App\Services\Finance\OrderLedgerService;
 use App\Services\Sales\QuotationService;
 use App\Services\Sales\RequestConversionService;
 use App\Services\Sales\StatusTransitionService;
@@ -94,8 +99,11 @@ class OrderController extends Controller
         ]);
     }
 
-    public function show(Order $order): View
-    {
+    public function show(
+        Order $order,
+        StatusTransitionService $transitions,
+        OrderLedgerService $ledgerService,
+    ): View {
         Gate::authorize('view', $order);
 
         $order->load(['customer', 'items', 'sourceRequest']);
@@ -112,11 +120,67 @@ class OrderController extends Controller
             ->orderBy('id')
             ->get();
 
+        // Status pengerjaan, histori, pembayaran, dan refund (FIN-FR-008, 009, 010, 016, 019).
+        $isOwner = auth()->user()?->isOwner() ?? false;
+
+        $payments = Payment::query()
+            ->where('order_id', $order->id)
+            ->with(['recordedBy', 'voidedBy'])
+            ->orderByDesc('payment_date')
+            ->orderByDesc('id')
+            ->get();
+
+        $refunds = Refund::query()
+            ->where('order_id', $order->id)
+            ->with(['payment', 'recordedBy'])
+            ->orderByDesc('refund_date')
+            ->orderByDesc('id')
+            ->get();
+
+        try {
+            $ledger = $ledgerService->summary($order);
+            $ledgerError = null;
+        } catch (FinanceRuleException $e) {
+            $ledger = null;
+            $ledgerError = $e->getMessage();
+        }
+
+        $refundable = $payments
+            ->mapWithKeys(fn (Payment $payment) => [
+                $payment->id => $payment->isValid()
+                    ? max(0, (int) $payment->amount - $ledgerService->completedRefundsForPayment($payment))
+                    : 0,
+            ])
+            ->all();
+
         return view('admin.orders.show', [
             'order' => $order,
             'orderRequest' => null,
             'customer' => $order->customer,
             'attachments' => $attachments,
+            'isOwner' => $isOwner,
+            'ledger' => $ledger,
+            'ledgerError' => $ledgerError,
+            'payments' => $payments,
+            'refunds' => $refunds,
+            'refundable' => $refundable,
+            'statusHistory' => OrderStatusHistory::query()
+                ->where('order_id', $order->id)
+                ->with('changedBy')
+                ->orderByDesc('changed_at')
+                ->orderByDesc('id')
+                ->get(),
+            // Pilihan status manual; pembatalan punya tombol sendiri (Owner).
+            'statusTargets' => collect($transitions->allowedOrderTransitions($order->status, $isOwner))
+                ->reject(fn ($status) => $status === OrderStatus::Cancelled)
+                ->mapWithKeys(fn ($status) => [$status->value => $status->label()])
+                ->all(),
+            'canCancel' => $isOwner
+                && in_array(OrderStatus::Cancelled, $transitions->allowedOrderTransitions($order->status, true), true),
+            'canRecordPayment' => $ledger !== null
+                && $order->status !== OrderStatus::Cancelled
+                && (int) $order->total > 0
+                && $ledger['remaining'] > 0,
         ]);
     }
 
