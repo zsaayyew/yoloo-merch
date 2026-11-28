@@ -42,7 +42,7 @@ class OrderSubmissionService
     private const MAX_CODE_ATTEMPTS = 3;
 
     /** Kunci pengaturan usaha yang disepakati (AI_CONTEXT bagian 7 poin 10). */
-    private const SETTING_KEYS = ['pickup_location', 'pickup_hours', 'address', 'operating_hours', 'whatsapp_number', 'business_name'];
+    private const SETTING_KEYS = ['pickup_location', 'pickup_hours', 'address', 'operating_hours', 'whatsapp_number', 'whatsapp', 'business_name'];
 
     /** @var array<string, string|null>|null cache pengaturan usaha per request */
     private ?array $settings = null;
@@ -170,7 +170,9 @@ class OrderSubmissionService
      */
     public function whatsappUrl(string $code, string $customerName, bool $isCustomRequest = false): ?string
     {
-        $number = PhoneNumber::normalize((string) ($this->settings()['whatsapp_number'] ?? ''));
+        $settings = $this->settings();
+        // ADM menyimpan nomor dengan kunci "whatsapp"; "whatsapp_number" (AI_CONTEXT) tetap didukung.
+        $number = PhoneNumber::normalize((string) ($settings['whatsapp_number'] ?? $settings['whatsapp'] ?? ''));
 
         if (! PhoneNumber::isValid($number)) {
             return null;
@@ -212,9 +214,14 @@ class OrderSubmissionService
         }
 
         try {
-            $this->settings = Schema::hasColumns('site_settings', ['key', 'value'])
-                ? DB::table('site_settings')->whereIn('key', self::SETTING_KEYS)->pluck('value', 'key')->all()
-                : [];
+            // ADM (Taufik) memakai kolom setting_key / setting_value; format key / value tetap didukung.
+            $this->settings = match (true) {
+                Schema::hasColumns('site_settings', ['setting_key', 'setting_value']) => DB::table('site_settings')
+                    ->whereIn('setting_key', self::SETTING_KEYS)->pluck('setting_value', 'setting_key')->all(),
+                Schema::hasColumns('site_settings', ['key', 'value']) => DB::table('site_settings')
+                    ->whereIn('key', self::SETTING_KEYS)->pluck('value', 'key')->all(),
+                default => [],
+            };
         } catch (Throwable) {
             $this->settings = [];
         }
