@@ -9,6 +9,8 @@ use App\Models\Product;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CatalogManagementTest extends TestCase
@@ -184,6 +186,50 @@ class CatalogManagementTest extends TestCase
             ->assertRedirect(route('admin.pricing.index'));
 
         $this->assertSame(PricingConfiguration::STATUS_INACTIVE, $pricing->fresh()->status);
+    }
+
+    public function test_guest_catalog_reflects_admin_publication_photos_and_active_pricing(): void
+    {
+        $this->withoutVite();
+        Storage::fake('public');
+        $admin = $this->makeUser(Role::ADMIN);
+        $product = $this->makeProduct();
+        $photo = file_get_contents(public_path('images/brand/yoloo-symbol.png'));
+
+        $this->actingAs($admin)->put(route('admin.products.update', $product), [
+            'category_id' => $product->category_id,
+            'name' => $product->name,
+            'status' => Product::STATUS_ACTIVE,
+            'price_model' => 'fixed',
+            'allows_direct_purchase' => '1',
+            'specifications' => [['label' => 'Bahan', 'value' => 'Katun']],
+            'images' => [
+                UploadedFile::fake()->createWithContent('depan.png', $photo),
+                UploadedFile::fake()->createWithContent('belakang.png', $photo),
+            ],
+        ])->assertRedirect();
+        $this->post(route('admin.pricing.store', $product), [
+            'price_model' => 'fixed',
+            'status' => 'active',
+            'effective_date' => today()->toDateString(),
+            'base_price' => 50000,
+        ])->assertRedirectToRoute('admin.pricing.index');
+
+        $this->app['auth']->forgetGuards();
+        $detail = $this->get('/produk/kaos-custom')->assertOk()
+            ->assertSee('Katun')->assertSee('Rp50.000');
+        $this->assertGuest();
+        $this->assertDatabaseCount('product_images', 2);
+        foreach ($product->images as $image) {
+            Storage::disk('public')->assertExists($image->path);
+            $detail->assertSee(Storage::disk('public')->url($image->path));
+        }
+
+        $this->actingAs($admin)->patch(route('admin.products.archive', $product))
+            ->assertRedirectToRoute('admin.products.index');
+        $this->app['auth']->forgetGuards();
+        $this->get('/produk/kaos-custom')->assertNotFound();
+        $this->get('/produk')->assertOk()->assertDontSee('Kaos Custom');
     }
 
     private function makeProduct(): Product

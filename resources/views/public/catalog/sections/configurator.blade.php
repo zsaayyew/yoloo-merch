@@ -8,13 +8,14 @@
 @endphp
 
 <form id="konfigurasi" method="POST" action="{{ route('products.estimate', ['product' => $product->slug]) }}"
-      data-catalog-configurator data-price-model="{{ $priceModel }}" class="min-w-0 space-y-5 rounded-3xl border border-[#cbd7d2] bg-white p-4 sm:p-6">
+      data-catalog-configurator data-price-model="{{ $priceModel }}" class="min-w-0 scroll-mt-24 space-y-5 rounded-3xl border border-[#cbd7d2] bg-white p-4 sm:p-6">
     @csrf
     <input name="product_id" value="{{ $product->id }}" type="hidden">
     <h2 class="border-b border-[#dde4df] pb-4 text-2xl font-black tracking-tight">Konfigurasi produk</h2>
 
     @if ($errors->any())
-        <ul role="alert" class="list-disc space-y-1 rounded-xl border-l-4 border-[#E97E37] bg-[#fff2e7] p-3 pl-8 text-sm text-[#793617]">
+        <ul role="alert" data-catalog-server-errors data-pricing-only="{{ $errors->keys() === ['pricing'] ? 'true' : 'false' }}"
+            class="list-disc space-y-1 rounded-xl border-l-4 border-[#E97E37] bg-[#fff2e7] p-3 pl-8 text-sm text-[#793617]">
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
             @endforeach

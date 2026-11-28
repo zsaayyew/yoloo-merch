@@ -1,0 +1,177 @@
+<?php
+
+return [
+    'categories' => [
+        'stiker' => ['name' => 'Stiker', 'description' => 'Stiker cetak custom untuk kemasan, label, dan koleksi.', 'sort_order' => 10],
+        'gantungan-kunci' => ['name' => 'Gantungan Kunci', 'description' => 'Gantungan kunci akrilik untuk suvenir dan merchandise.', 'sort_order' => 20],
+        'apparel' => ['name' => 'Apparel', 'description' => 'Kaos dan tote bag untuk pemakaian sehari-hari atau kebutuhan acara.', 'sort_order' => 30],
+    ],
+    'products' => [
+        'stiker-vinyl-custom' => [
+            'name' => 'Stiker Vinyl Custom',
+            'legacy_slug' => 'demo-stiker-vinyl',
+            'category' => 'stiker',
+            'description' => 'Stiker vinil berperekat untuk label kemasan, laptop, atau botol. Pilih ukuran dan laminasi sesuai kebutuhan cetak.',
+            'specifications' => [
+                'Bahan' => 'Vinil putih berperekat',
+                'Ukuran' => '5 × 5 cm atau 10 × 10 cm',
+                'Finishing' => 'Laminasi glossy atau doff',
+                'Potong' => 'Kiss cut mengikuti garis desain',
+            ],
+            'alt_text' => 'Stiker vinil dengan ilustrasi geometris dan tepi potongan putih',
+            'price_model' => 'calculator',
+            'price' => 1500,
+            'options' => [
+                ['name' => 'Ukuran', 'required' => true, 'values' => ['vinyl-5' => '5 x 5 cm', 'vinyl-10' => '10 x 10 cm']],
+                ['name' => 'Finishing', 'required' => true, 'values' => ['glossy' => 'Glossy', 'doff' => 'Doff']],
+            ],
+            'pricing' => [
+                'minimum_quantity' => 50,
+                'option_surcharges' => ['vinyl-10' => 2000, 'doff' => 300],
+                'quantity_tiers' => [
+                    ['min' => 50, 'max' => 99, 'discount_per_unit' => 0],
+                    ['min' => 100, 'max' => null, 'discount_per_unit' => 200],
+                ],
+                'extra_fee' => 0,
+                'minimum_total' => 0,
+            ],
+        ],
+        'stiker-hologram' => [
+            'name' => 'Stiker Hologram',
+            'category' => 'stiker',
+            'description' => 'Stiker berlapis film holografik yang memantulkan warna pelangi ketika dilihat dari sudut berbeda. Cocok untuk edisi koleksi dan segel kemasan.',
+            'specifications' => [
+                'Bahan' => 'Film holografik perak berperekat',
+                'Ukuran' => '5 × 5 cm',
+                'Finishing' => 'Permukaan mengilap',
+                'Potong' => 'Kiss cut atau die cut',
+            ],
+            'alt_text' => 'Stiker hologram perak dengan pantulan pelangi',
+            'price_model' => 'starting_from',
+            'price' => 3000,
+            'options' => [
+                ['name' => 'Jenis Potong', 'required' => true, 'values' => ['kiss' => 'Kiss cut', 'die' => 'Die cut']],
+            ],
+            'pricing' => ['minimum_quantity' => 25],
+        ],
+        'stiker-transparan' => [
+            'name' => 'Stiker Transparan',
+            'category' => 'stiker',
+            'description' => 'Stiker bening untuk kaca, botol, dan kemasan transparan. Tinta putih tersedia pada ukuran tertentu untuk membantu warna terlihat pada latar gelap.',
+            'specifications' => [
+                'Bahan' => 'Film PET transparan berperekat',
+                'Ukuran' => '3 × 3 cm atau 5 × 5 cm',
+                'Cetak' => 'Warna penuh dengan pilihan lapisan tinta putih',
+            ],
+            'alt_text' => 'Detail stiker transparan dengan motif daun pada kaca',
+            'price_model' => 'calculator',
+            'price' => 1800,
+            'options' => [
+                ['name' => 'Ukuran', 'required' => true, 'values' => ['clear-3' => '3 x 3 cm', 'clear-5' => '5 x 5 cm']],
+                ['name' => 'Jenis Cetak', 'required' => true, 'values' => ['color' => 'Cetak warna', 'white' => 'Warna dengan tinta putih']],
+            ],
+            'forbidden' => ['clear-3' => ['white']],
+            'pricing' => [
+                'minimum_quantity' => 30,
+                'maximum_quantity' => 1000,
+                'option_surcharges' => ['clear-5' => 700, 'white' => 600],
+                'quantity_tiers' => [
+                    ['min' => 30, 'max' => 99, 'discount_per_unit' => 0],
+                    ['min' => 100, 'max' => 299, 'discount_per_unit' => 150],
+                    ['min' => 300, 'max' => 1000, 'discount_per_unit' => 300],
+                ],
+                'extra_fee' => 5000,
+                'minimum_total' => 65000,
+            ],
+        ],
+        'gantungan-kunci-akrilik' => [
+            'name' => 'Gantungan Kunci Akrilik',
+            'legacy_slug' => 'demo-gantungan-akrilik',
+            'category' => 'gantungan-kunci',
+            'description' => 'Gantungan kunci akrilik bulat dengan desain grafis standar. Cocok sebagai suvenir atau aksesori tas.',
+            'specifications' => [
+                'Bahan' => 'Akrilik bening',
+                'Diameter' => '5 cm',
+                'Ketebalan' => '3 mm',
+                'Pengait' => 'Ring besi warna perak',
+            ],
+            'alt_text' => 'Gantungan kunci akrilik bulat dengan ring logam warna perak',
+            'price_model' => 'fixed',
+            'price' => 15000,
+            'options' => [
+                ['name' => 'Pengait', 'required' => false, 'values' => ['ring' => 'Ring perak standar']],
+            ],
+        ],
+        'gantungan-kunci-custom' => [
+            'name' => 'Gantungan Kunci Custom',
+            'category' => 'gantungan-kunci',
+            'description' => 'Gantungan kunci berbentuk sesuai garis desain. Admin meninjau ukuran, detail potong, jenis pengait, dan jumlah sebelum memberikan penawaran.',
+            'specifications' => [
+                'Bahan' => 'Akrilik bening 3 mm',
+                'Ukuran' => 'Sisi terpanjang 4–7 cm',
+                'Cetak' => 'UV warna penuh',
+                'Potong' => 'Laser mengikuti bentuk desain',
+            ],
+            'alt_text' => 'Dua gantungan kunci custom akrilik dengan bentuk bunga dan gunung',
+            'price_model' => 'quotation',
+            'options' => [
+                ['name' => 'Cetak', 'required' => true, 'values' => ['single' => 'Satu sisi', 'double' => 'Dua sisi']],
+                ['name' => 'Pengait', 'required' => true, 'values' => ['split' => 'Ring bulat', 'clasp' => 'Kait lobster']],
+            ],
+        ],
+        'kaos-sablon-custom' => [
+            'name' => 'Kaos Sablon Custom',
+            'legacy_slug' => 'demo-kaos-sablon',
+            'category' => 'apparel',
+            'description' => 'Kaos katun untuk kebutuhan komunitas, acara, dan merchandise. Penawaran disesuaikan dengan bahan, area sablon, desain, dan kuantitas.',
+            'specifications' => [
+                'Bahan' => 'Cotton combed 24s atau 30s',
+                'Potongan' => 'Regular fit uniseks',
+                'Rentang ukuran' => 'S–XXL',
+                'Cetak' => 'Sablon satu atau dua sisi',
+            ],
+            'alt_text' => 'Kaos warna krem dengan sablon grafis di bagian depan',
+            'price_model' => 'quotation',
+            'options' => [
+                ['name' => 'Bahan', 'required' => false, 'values' => ['cotton-24' => 'Cotton combed 24s', 'cotton-30' => 'Cotton combed 30s']],
+                ['name' => 'Area Sablon', 'required' => false, 'values' => ['front' => 'Depan', 'both' => 'Depan dan belakang']],
+            ],
+        ],
+        'kaos-polos' => [
+            'name' => 'Kaos Polos',
+            'category' => 'apparel',
+            'description' => 'Kaos polos berbahan katun dengan potongan reguler dan kerah bulat. Cocok untuk pemakaian sehari-hari atau sebagai dasar merchandise.',
+            'specifications' => [
+                'Bahan' => 'Cotton combed 30s',
+                'Potongan' => 'Regular fit uniseks',
+                'Kerah' => 'Bulat dengan rib',
+                'Ukuran' => 'S–XL',
+            ],
+            'alt_text' => 'Kaos polos warna hijau kebiruan dengan kerah bulat',
+            'price_model' => 'fixed',
+            'price' => 55000,
+            'options' => [
+                ['name' => 'Ukuran', 'required' => true, 'values' => ['s' => 'S', 'm' => 'M', 'l' => 'L', 'xl' => 'XL']],
+                ['name' => 'Warna', 'required' => true, 'values' => ['teal' => 'Hijau kebiruan', 'black' => 'Hitam', 'cream' => 'Krem']],
+            ],
+        ],
+        'tote-bag-custom' => [
+            'name' => 'Tote Bag Custom',
+            'category' => 'apparel',
+            'description' => 'Tas kanvas dengan cetak desain untuk suvenir dan merchandise acara. Harga awal berlaku untuk cetak satu sisi.',
+            'specifications' => [
+                'Bahan' => 'Kanvas katun warna natural',
+                'Ukuran' => '35 × 40 cm',
+                'Tali' => 'Tali kanvas jahit',
+                'Area cetak' => 'Maksimal 25 × 30 cm per sisi',
+            ],
+            'alt_text' => 'Tote bag kanvas warna natural dengan motif daun dan dua tali',
+            'price_model' => 'starting_from',
+            'price' => 29000,
+            'options' => [
+                ['name' => 'Area Cetak', 'required' => true, 'values' => ['one-side' => 'Satu sisi', 'two-sides' => 'Dua sisi']],
+            ],
+            'pricing' => ['minimum_quantity' => 15],
+        ],
+    ],
+];

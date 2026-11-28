@@ -81,6 +81,20 @@ Buka `http://localhost:8000`, panel admin di `http://localhost:8000/admin/login`
 
 Catatan: proyek memakai MySQL dengan nama database `yoloo_merch` dan user `root` tanpa password (standar Laragon). Sesuaikan `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` di `.env` bila konfigurasi MySQL di komputermu berbeda.
 
+### Data dummy katalog untuk pengembangan
+
+Setelah migrasi berjalan, siapkan tiga kategori dan delapan produk uji, termasuk foto sintetis yang disertakan di repositori.
+
+```bash
+php artisan db:seed --class=CatalogDemoSeeder
+```
+
+Buka katalog di `/produk` dan kelola data melalui `/admin/products`, `/admin/categories`, dan `/admin/pricing`. Untuk instalasi baru, siapkan tautan `public/storage` dengan `php artisan storage:link` bila belum tersedia.
+
+Seeder ini khusus lingkungan `local` dan `testing`. Seeder memperbarui data lama pada ID yang sama, melewati benturan nama atau slug produk, dan mempertahankan perubahan admin pada eksekusi berikutnya. Perintah lama dengan `--class=OrderingDemoSeeder` menjalankan paket yang sama. `DatabaseSeeder` tetap memakai konfigurasi onboarding biasa.
+
+Foto dibuat dengan ImageGen untuk katalog contoh. Deskripsi, spesifikasi, dan harga di paket ini adalah data pengujian. Produk dengan model penawaran mengikuti alur ORD tanpa angka harga.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

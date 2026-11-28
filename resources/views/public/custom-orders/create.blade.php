@@ -34,6 +34,12 @@
                 @error('website')
                     <p class="mt-1">{{ $message }}</p>
                 @enderror
+                @error('product_slug')
+                    <p class="mt-1">{{ $message }}</p>
+                @enderror
+                @error('option_value_ids')
+                    <p class="mt-1">{{ $message }}</p>
+                @enderror
             </div>
         @endif
 
