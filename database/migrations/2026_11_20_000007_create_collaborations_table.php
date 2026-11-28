@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Schema;
 /*
  * Tabel   : collaborations
  * Domain  : PRD-04 ADM - Admin Dashboard & CMS (Taufik)
- * Catatan : kerangka. Kolom final ditulis pemilik domain saat fitur dikerjakan,
- *           mengacu ke Master PRD (bagian J Data requirements) dan ERD bersama.
+ * Catatan : kolom final ditambahkan migration 2026_11_27_000001_add_adm_cms_columns
+ *           agar database yang sudah berjalan ikut terbarui tanpa kehilangan data.
  */
 return new class extends Migration
 {

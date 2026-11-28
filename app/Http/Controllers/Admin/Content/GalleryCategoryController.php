@@ -3,63 +3,107 @@
 namespace App\Http\Controllers\Admin\Content;
 
 use App\Http\Controllers\Controller;
+use App\Models\GalleryCategory;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class GalleryCategoryController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the gallery categories (ADM-FR-007).
      */
-    public function index()
+    public function index(): View
     {
-        //
+        return view('admin.content.gallery-categories.index', [
+            'categories' => GalleryCategory::query()->withCount('items')->ordered()->get(),
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new gallery category.
      */
-    public function create()
+    public function create(): View
     {
-        //
+        return view('admin.content.gallery-categories.form', [
+            'category' => new GalleryCategory(['is_active' => true]),
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created gallery category.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        //
+        $data = $this->validated($request);
+        $data['slug'] = GalleryCategory::uniqueSlug($data['name']);
+
+        GalleryCategory::query()->create($data);
+
+        return redirect()
+            ->route('admin.content.gallery-categories.index')
+            ->with('status', 'Kategori galeri berhasil ditambahkan.');
     }
 
     /**
-     * Display the specified resource.
+     * Show the form for editing the given gallery category.
      */
-    public function show(string $id)
+    public function edit(GalleryCategory $galleryCategory): View
     {
-        //
+        return view('admin.content.gallery-categories.form', [
+            'category' => $galleryCategory,
+        ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Update the given gallery category.
      */
-    public function edit(string $id)
+    public function update(Request $request, GalleryCategory $galleryCategory): RedirectResponse
     {
-        //
+        $data = $this->validated($request);
+        $data['slug'] = GalleryCategory::uniqueSlug($data['name'], $galleryCategory->id);
+
+        $galleryCategory->update($data);
+
+        return redirect()
+            ->route('admin.content.gallery-categories.index')
+            ->with('status', 'Kategori galeri berhasil diperbarui.');
     }
 
     /**
-     * Update the specified resource in storage.
+     * Remove the given gallery category.
      */
-    public function update(Request $request, string $id)
+    public function destroy(GalleryCategory $galleryCategory): RedirectResponse
     {
-        //
+        if ($galleryCategory->items()->exists()) {
+            return back()->withErrors([
+                'category' => 'Kategori masih memiliki item galeri. Pindahkan atau hapus itemnya lebih dulu.',
+            ]);
+        }
+
+        $galleryCategory->delete();
+
+        return redirect()
+            ->route('admin.content.gallery-categories.index')
+            ->with('status', 'Kategori galeri berhasil dihapus.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Validate the gallery category payload.
+     *
+     * @return array<string, mixed>
      */
-    public function destroy(string $id)
+    private function validated(Request $request): array
     {
-        //
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'description' => ['nullable', 'string', 'max:500'],
+            'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
+        ]);
+
+        $data['is_active'] = $request->boolean('is_active');
+        $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
+
+        return $data;
     }
 }
