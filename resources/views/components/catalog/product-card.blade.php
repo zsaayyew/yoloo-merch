@@ -9,9 +9,11 @@
                 <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($image->path) }}"
                      alt="{{ $image->alt_text ?: 'Foto ' . $product->name }}" width="480" height="360" loading="lazy"
                      class="aspect-[4/3] w-full object-cover">
-                <span data-catalog-no-photo hidden class="p-3 text-center">Foto tidak tersedia</span>
+                <span data-catalog-no-photo hidden class="h-full w-full">
+                    <x-catalog.photo-placeholder label="Foto tidak tersedia" />
+                </span>
             @else
-                <span>Foto belum tersedia</span>
+                <x-catalog.photo-placeholder />
             @endif
         </div>
         <div class="space-y-2 p-4">

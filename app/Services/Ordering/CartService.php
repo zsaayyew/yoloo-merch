@@ -74,7 +74,7 @@ class CartService
 
             // Ubah opsi tanpa mengganti konfigurasi: cukup set jumlah baru.
             if ($replace && $replace->configuration_hash === $hash) {
-                $replace->update($this->attributesFromPayload($payload, $hash));
+                $replace->update($this->estimateAttributes($payload));
 
                 return $replace;
             }
@@ -88,7 +88,7 @@ class CartService
                     $existing->option_value_ids,
                     $existing->quantity + $payload['quantity'],
                 );
-                $existing->update($this->attributesFromPayload($merged, $hash));
+                $existing->update($this->estimateAttributes($merged));
                 $this->retire($replace, $existing);
 
                 return $existing;
@@ -97,7 +97,7 @@ class CartService
             $otherItems = $cart->items()->when($replace, fn ($q) => $q->whereKeyNot($replace->id))->count();
             if ($otherItems >= Cart::MAX_ITEMS) {
                 throw ValidationException::withMessages([
-                    'cart' => 'Keranjang maksimal berisi ' . Cart::MAX_ITEMS . ' produk. Selesaikan atau hapus sebagian dulu.',
+                    'cart' => 'Keranjang maksimal berisi '.Cart::MAX_ITEMS.' produk. Selesaikan atau hapus sebagian dulu.',
                 ]);
             }
 
@@ -124,7 +124,7 @@ class CartService
     public function updateQuantity(CartItem $item, int $quantity): CartItem
     {
         $payload = $this->payloadBuilder->build($item->product, $item->option_value_ids, $quantity);
-        $item->update($this->attributesFromPayload($payload, $item->configuration_hash));
+        $item->update($this->estimateAttributes($payload));
 
         return $item;
     }
@@ -189,7 +189,7 @@ class CartService
             }
 
             $payload = $this->payloadBuilder->build($item->product, $item->option_value_ids, $item->quantity);
-            $item->update($this->attributesFromPayload($payload, $item->configuration_hash));
+            $item->update($this->estimateAttributes($payload));
 
             return [
                 'item' => $item,
@@ -235,6 +235,12 @@ class CartService
             'options_snapshot' => $payload['options'],
             'option_value_ids' => array_column($payload['options'], 'option_value_id'),
             'configuration_hash' => $hash,
+        ] + $this->estimateAttributes($payload);
+    }
+
+    private function estimateAttributes(array $payload): array
+    {
+        return [
             'quantity' => $payload['quantity'],
             'price_model' => $payload['price_model'],
             'estimated_unit_price' => $payload['estimated_unit_price'],

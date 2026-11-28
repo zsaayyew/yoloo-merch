@@ -2,7 +2,7 @@
 @php($estimate = session('catalog_estimate'))
 
 <section id="kalkulator" aria-label="Kalkulator estimasi harga"
-         class="space-y-4 rounded-2xl border-t-4 border-[#EFC156] bg-[#fff8e1] p-4 text-[#182F32] sm:p-5">
+         class="scroll-mt-24 space-y-4 rounded-2xl border-t-4 border-[#EFC156] bg-[#fff8e1] p-4 text-[#182F32] sm:p-5">
     <x-catalog.estimate-note />
 
     <div data-catalog-estimate aria-live="polite" @if (!$estimate) hidden @endif

@@ -11,6 +11,7 @@ for (const form of document.querySelectorAll("[data-catalog-configurator]")) {
   const status = form.querySelector("[data-catalog-status]");
   const selection = form.querySelector("[data-catalog-selection]");
   const retry = form.querySelector("[data-catalog-retry]");
+  const serverErrors = form.querySelector("[data-catalog-server-errors]");
   const calculator = form.dataset.priceModel === "calculator";
   let activeRequest;
   let timer;
@@ -90,6 +91,7 @@ for (const form of document.querySelectorAll("[data-catalog-configurator]")) {
   }
 
   function scheduleCheck(immediate = false) {
+    serverErrors?.remove();
     activeRequest?.abort();
     clearTimeout(timer);
     form.removeAttribute("aria-busy");
@@ -161,7 +163,9 @@ for (const form of document.querySelectorAll("[data-catalog-configurator]")) {
     scheduleCheck(true);
   });
 
-  if (!form.querySelector('[role="alert"]')) {
+  if (serverErrors) {
+    updateButtons(false, serverErrors.dataset.pricingOnly === "true");
+  } else {
     scheduleCheck();
   }
 }

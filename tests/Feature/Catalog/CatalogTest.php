@@ -2,12 +2,20 @@
 
 namespace Tests\Feature\Catalog;
 
+use App\Models\CartItem;
+use App\Models\Order;
+use App\Models\OrderRequest;
 use App\Models\Product;
+use App\Services\Catalog\CatalogData;
 use App\Services\Catalog\ConfigurationPayloadBuilder;
+use App\Services\Ordering\CartService;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Testing\TestResponse;
+use PDOException;
 use Tests\TestCase;
 
 class CatalogTest extends TestCase
@@ -33,6 +41,14 @@ class CatalogTest extends TestCase
         $this->get('/produk/kategori/arsip')->assertNotFound();
     }
 
+    public function test_katalog_redirects_guests_to_produk_and_keeps_filters(): void
+    {
+        $this->get('/katalog?q=Stiker&category=cetak')->assertRedirectToRoute('catalog.index', [
+            'q' => 'Stiker',
+            'category' => 'cetak',
+        ]);
+    }
+
     public function test_product_detail_and_public_not_found_states(): void
     {
         $this->get('/produk/stiker')->assertOk()->assertSee('Stiker kertas')->assertSee('Finishing')
@@ -43,6 +59,20 @@ class CatalogTest extends TestCase
         $this->get('/produk/tetap')->assertOk()->assertSee('Harga tetap')->assertSee('Rp3.000');
         $this->get('/produk/mulai')->assertOk()->assertSee('Harga mulai dari')->assertSee('Rp4.000');
         $this->get('/produk/penawaran')->assertOk()->assertSee('Minta penawaran')->assertDontSee('Total estimasi');
+    }
+
+    public function test_catalog_returns_retry_and_no_estimate_when_database_queries_fail(): void
+    {
+        $failure = new QueryException('catalog', 'select', [], new PDOException('Database unavailable'));
+        $this->mock(CatalogData::class, function ($mock) use ($failure): void {
+            $mock->shouldReceive('categories')->once()->andThrow($failure);
+            $mock->shouldReceive('product')->twice()->with('stiker')->andThrow($failure);
+        });
+
+        $this->get('/produk')->assertServiceUnavailable()->assertSee('Coba lagi');
+        $this->get('/produk/stiker')->assertServiceUnavailable()->assertSee('Coba lagi');
+        $this->postJson('/produk/stiker/estimasi', ['quantity' => 10])
+            ->assertServiceUnavailable()->assertJsonMissingPath('total');
     }
 
     public function test_product_detail_prefills_the_cart_edit_configuration(): void
@@ -139,7 +169,7 @@ class CatalogTest extends TestCase
         $this->postJson('/keranjang', ['product_id' => 5, 'quantity' => 2])->assertJsonPath('estimated_total', 8000);
 
         $this->post('/produk/penawaran/estimasi', ['quantity' => 10, 'intent' => 'quotation'])
-            ->assertRedirect(route('custom-orders.create', ['produk' => 'penawaran']))
+            ->assertRedirectToRoute('custom-orders.create', ['produk' => 'penawaran', 'jumlah' => 10])
             ->assertSessionHas('catalog_configuration', [
                 'product_id' => 6,
                 'product_name_snapshot' => 'Produk penawaran',
@@ -150,6 +180,110 @@ class CatalogTest extends TestCase
                 'estimated_total' => null,
                 'pricing_version' => null,
             ]);
+    }
+
+    public function test_quotation_handoff_prefills_selected_options_and_persists_them_without_a_price(): void
+    {
+        $product = Product::where('slug', 'penawaran')->firstOrFail();
+        $group = $product->optionGroups()->create(['name' => 'Bahan', 'is_required' => true]);
+        $value = $group->values()->create(['label' => 'Katun', 'is_active' => true]);
+
+        $handoff = $this->post('/produk/penawaran/estimasi', [
+            'intent' => 'quotation',
+            'option_value_ids' => [$value->id],
+            'quantity' => 18,
+        ]);
+
+        $handoff->assertRedirectToRoute('custom-orders.create', [
+            'produk' => 'penawaran',
+            'opsi' => [$value->id],
+            'jumlah' => 18,
+        ]);
+        $form = $this->get($handoff->headers->get('Location'))
+            ->assertOk()->assertSee('Produk penawaran')->assertSee('Katun')
+            ->assertViewHas('prefillQuantity', 18);
+        $this->keepSessionCookie($form);
+
+        $this->post('/custom-order', [
+            'submission_token' => $form->viewData('submissionToken'),
+            'product_slug' => 'penawaran',
+            'option_value_ids' => [$value->id],
+            'quantity' => 18,
+            'description' => 'Produk katun untuk contoh pengujian.',
+            'name' => 'Pelanggan Uji',
+            'whatsapp_number' => '081234567890',
+            'agreement' => 'yes',
+        ])->assertRedirectContains('/custom-order/berhasil/');
+
+        $orderRequest = OrderRequest::sole();
+        $this->assertSame('Produk penawaran', $orderRequest->product_name_snapshot);
+        $this->assertSame([['group' => 'Bahan', 'value' => 'Katun', 'option_value_id' => $value->id]], $orderRequest->options_snapshot);
+        $this->assertSame(18, $orderRequest->quantity);
+        $this->assertNull($orderRequest->budget);
+    }
+
+    public function test_custom_order_ignores_malformed_or_unpublished_product_references(): void
+    {
+        $this->get('/custom-order?produk[]=stiker')->assertOk()->assertViewHas('product', null);
+        $this->get('/custom-order?produk=tersembunyi')->assertOk()->assertViewHas('product', null);
+    }
+
+    public function test_custom_order_rejects_a_catalog_product_archived_after_the_form_opens(): void
+    {
+        $form = $this->get('/custom-order?produk=stiker&opsi[]=7&jumlah=18')->assertOk();
+        $this->keepSessionCookie($form);
+        Product::where('slug', 'stiker')->update(['status' => 'archived']);
+
+        $this->post('/custom-order', [
+            'submission_token' => $form->viewData('submissionToken'),
+            'product_slug' => 'stiker',
+            'option_value_ids' => [7],
+            'quantity' => 18,
+            'description' => 'Cetak stiker untuk contoh pengujian.',
+            'name' => 'Pelanggan Uji',
+            'whatsapp_number' => '081234567890',
+            'agreement' => 'yes',
+        ])->assertSessionHasErrors('product_slug');
+
+        $this->assertDatabaseCount('order_requests', 0);
+    }
+
+    public function test_real_cart_and_checkout_keep_catalog_snapshots_and_use_server_prices(): void
+    {
+        $this->from('/produk/stiker')->post('/keranjang', [
+            'product_id' => 1,
+            'option_value_ids' => [7],
+            'quantity' => 10,
+            'estimated_total' => 1,
+        ])->assertRedirectToRoute('cart.index')->assertCookie(CartService::COOKIE_NAME);
+
+        $item = CartItem::with('cart')->sole();
+        $this->assertSame(21000, $item->estimated_subtotal);
+        Product::whereKey(1)->update(['name' => 'Stiker baru']);
+        DB::table('option_values')->where('id', 7)->update(['label' => 'Vinil baru']);
+
+        $this->withCookie(CartService::COOKIE_NAME, $item->cart->token)
+            ->get('/keranjang')->assertOk()->assertSee('Stiker kertas')->assertSee('Vinil')
+            ->assertSee('21.000')->assertDontSee('Vinil baru');
+        $this->post('/checkout', ['name' => 'Pelanggan Uji', 'whatsapp_number' => '081234567890'])
+            ->assertRedirectToRoute('checkout.summary');
+        $summary = $this->get('/checkout/ringkasan')->assertOk()->assertSee('Stiker kertas')->assertSee('Vinil');
+        $this->keepSessionCookie($summary);
+        $this->post('/checkout/kirim', [
+            'submission_token' => $summary->viewData('submissionToken'),
+            'agreement' => 'yes',
+        ])->assertRedirectContains('/pesanan/berhasil/');
+
+        $orderItem = Order::sole()->items()->sole();
+        $this->assertSame('Stiker kertas', $orderItem->product_name_snapshot);
+        $this->assertSame([['group' => 'Bahan', 'value' => 'Vinil', 'option_value_id' => 7]], $orderItem->options_snapshot);
+        $this->assertSame(21000, $orderItem->subtotal);
+    }
+
+    private function keepSessionCookie(TestResponse $response): void
+    {
+        $name = config('session.cookie');
+        $this->withCookie($name, $response->getCookie($name)->getValue());
     }
 
     /**

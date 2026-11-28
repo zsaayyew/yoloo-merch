@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PublicSite\CustomOrderRequest;
 use App\Models\OrderRequest;
 use App\Models\Product;
+use App\Services\Catalog\CatalogData;
 use App\Services\Catalog\ConfigurationPayloadBuilder;
 use App\Services\Ordering\AttachmentService;
 use App\Services\Ordering\CustomRequestSubmissionService;
@@ -29,6 +30,7 @@ class CustomOrderController extends Controller
         private readonly AttachmentService $attachmentService,
         private readonly ConfigurationPayloadBuilder $payloadBuilder,
         private readonly OrderSubmissionService $orderSubmissionService,
+        private readonly CatalogData $catalog,
     ) {}
 
     public function create(Request $request): View
@@ -52,13 +54,27 @@ class CustomOrderController extends Controller
     public function store(CustomOrderRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $product = $this->findReferenceProduct($data['product_slug'] ?? null);
+        $slug = $data['product_slug'] ?? null;
+        $product = $this->findReferenceProduct($slug);
 
-        $data['options_snapshot'] = $this->referenceOptions(
-            $product,
-            $data['option_value_ids'] ?? [],
-            (int) $data['quantity'],
-        ) ?: null;
+        if ($slug !== null && $product === null) {
+            throw ValidationException::withMessages([
+                'product_slug' => 'Produk referensi sudah tidak tersedia. Silakan pilih produk lain dari katalog.',
+            ]);
+        }
+
+        $optionValueIds = $data['option_value_ids'] ?? [];
+        if ($product && $optionValueIds !== []) {
+            try {
+                $data['options_snapshot'] = $this->payloadBuilder->build(
+                    $product, $optionValueIds, (int) $data['quantity'], forQuotation: true,
+                )['options'];
+            } catch (ValidationException $exception) {
+                throw ValidationException::withMessages([
+                    'option_value_ids' => collect($exception->errors())->flatten()->first(),
+                ]);
+            }
+        }
 
         $orderRequest = $this->submissionService->submit(
             $data,
@@ -122,19 +138,8 @@ class CustomOrderController extends Controller
      * Produk referensi dari ?produk={slug} (dikirim dari tombol katalog CAT).
      * Hanya produk aktif yang dipakai; jika tidak ditemukan, formulir tetap bisa diisi.
      */
-    private function findReferenceProduct(?string $slug): ?Product
+    private function findReferenceProduct(mixed $slug): ?Product
     {
-        if (blank($slug)) {
-            return null;
-        }
-
-        $query = Product::query()->where('slug', $slug);
-
-        // scopeActive() disediakan pemilik model Product (kontrak AI_CONTEXT bagian 7 poin 1).
-        if (method_exists(Product::class, 'scopeActive')) {
-            $query->active();
-        }
-
-        return $query->first();
+        return is_string($slug) && $slug !== '' ? $this->catalog->product($slug) : null;
     }
 }

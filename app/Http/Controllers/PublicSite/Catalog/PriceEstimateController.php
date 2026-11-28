@@ -47,8 +47,11 @@ class PriceEstimateController extends Controller
                     ]);
                 }
 
-                return redirect()->route('custom-orders.create', ['produk' => $item->slug])
-                    ->with('catalog_configuration', $payload);
+                return redirect()->route('custom-orders.create', [
+                    'produk' => $item->slug,
+                    'opsi' => array_column($payload['options'], 'option_value_id'),
+                    'jumlah' => $payload['quantity'],
+                ])->with('catalog_configuration', $payload);
             }
 
             $estimate = null;
